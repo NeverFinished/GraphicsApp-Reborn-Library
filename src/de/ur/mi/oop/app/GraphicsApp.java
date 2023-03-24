@@ -33,6 +33,7 @@ import java.awt.event.MouseEvent;
 public abstract class GraphicsApp extends GraphicsAppCore implements GraphicsAppKeyListener, GraphicsAppMouseListener {
 
     private Background background;
+    private long frameCounter;
 
     public GraphicsApp() {
         super();
@@ -141,5 +142,13 @@ public abstract class GraphicsApp extends GraphicsAppCore implements GraphicsApp
     public void setCanvasSize(int width, int height) {
         getConfig().setWidth(width);
         getConfig().setHeight(height);
+    }
+
+    void incrementFrameCounter() {
+        frameCounter++;
+    }
+
+    public long getFrameCounter() {
+        return frameCounter;
     }
 }

@@ -2,6 +2,8 @@
 
 Neuimplementierung der GraphicsApp-Bibliothek ohne den ursprünglichen Processing-Kern.
 
+Fork von [OOP-Regensburg / GraphicsApp-Reborn-Library](https://github.com/OOP-Regensburg/GraphicsApp-Reborn-Library)
+
 ## Ziele
 
 Die GraphicsApp-Bibliothek ist eine einfache 2D-Grafikumgebung für die JAVA-Laufzeitumgebung. Sie dient in erster Linie
@@ -29,7 +31,7 @@ durch nachhaltige Lösungen ersetzt.
 
 5. Fehlende oder unzuverlässige Funktionen werden sinnvoll ergänzt bzw. verbessert (z.B. Audiowiedergabe).
 
-6. Die bestehende API wird hinsichtlich ihrer Vollständigkeit, Konsitenz und Versändlichkeit geprüft und ggf. optimiert.
+6. Die bestehende API wird hinsichtlich ihrer Vollständigkeit, Konsistenz und Verständlichkeit geprüft und ggf. optimiert.
 
 7. Bestehende und neu hinzugefügte Funktionen werden anhand verständlicher, zielgruppenorientierter Anleitungen und
 Beispiele dokumentiert.

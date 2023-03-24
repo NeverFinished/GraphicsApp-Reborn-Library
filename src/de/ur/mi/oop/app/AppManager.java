@@ -46,6 +46,7 @@ public class AppManager implements ConfigChangeListener, ActionListener, KeyList
 
     public void draw() {
         app.draw();
+        app.incrementFrameCounter();
         canvas.setComponents(app.getDrawBuffer());
         canvas.repaint();
         app.clearDrawBuffer();
