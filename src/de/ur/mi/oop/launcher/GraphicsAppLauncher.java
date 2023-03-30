@@ -3,6 +3,7 @@ package de.ur.mi.oop.launcher;
 import de.ur.mi.oop.app.AppManager;
 import de.ur.mi.oop.app.GraphicsApp;
 import de.ur.mi.oop.app.Config;
+import de.ur.mi.oop.app.GraphicsApp2;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -39,6 +40,9 @@ public class GraphicsAppLauncher {
             app.setConfig(config);
             app.initialize(); // calls GraphicsApp.init once
             appManager.start(); // starts loop to call GraphicsApp.draw repeatedly
+            if (app instanceof GraphicsApp2) {
+                ((GraphicsApp2) app).run();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
