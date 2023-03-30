@@ -39,4 +39,9 @@ public class Rectangle extends GraphicsObject {
         setHeight(height);
         this.type = GraphicsObjectType.RECTANGLE;
     }
+
+    public Rectangle withColor(Color color) {
+        setColor(color);
+        return this;
+    }
 }

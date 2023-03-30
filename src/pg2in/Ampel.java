@@ -6,6 +6,9 @@ import de.ur.mi.oop.events.MousePressedEvent;
 import de.ur.mi.oop.graphics.Circle;
 import de.ur.mi.oop.launcher.GraphicsAppLauncher;
 
+/**
+ * TODO auf ..2 umbauen, rect.setVisible() ? und dann noch mouse support (key later)
+ */
 public class Ampel extends GraphicsApp {
 
     private static final int X_BASE = 100;

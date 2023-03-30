@@ -222,6 +222,16 @@ public abstract class GraphicsObject {
     }
 
     /**
+     * Setzt die Hintergrundfarbe des Objekts
+     *
+     * @param color die neue Hintergrundfarbe
+     */
+    public GraphicsObject withColor(Color color) {
+        setColor(color);
+        return this;
+    }
+
+    /**
      * Setzt die Randfarbe des Objekts
      *
      * @param color die neue Randfarbe

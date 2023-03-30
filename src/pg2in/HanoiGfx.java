@@ -34,16 +34,16 @@ public class HanoiGfx extends GraphicsApp2 {
     private void addRod(int center) {
         int height = (NUM_DISCS + 3) * DISC_HEIGHT;
         int rod_top_y = HEIGHT - BOTTOM_MARGIN - height;
-        Rectangle rod = new Rectangle(center - ROD_WIDTH / 2, rod_top_y, ROD_WIDTH, height);
-        rod.setColor(Colors.BLACK);
-        scene.add(rod);
+        Rectangle rod = new Rectangle(center - ROD_WIDTH / 2, rod_top_y, ROD_WIDTH, height)
+            .withColor(Colors.BLACK);
+        add(rod);
     }
 
     private void addDisc(int num) {
         int width = ((num + 1) * DISC_BASE_INCR) + DISC_BASE_WIDTH;
-        Rectangle disc = new Rectangle(L_CENTER - width / 2, 0, width, DISC_HEIGHT);
-        disc.setColor(Colors.BLUE);
-        scene.add(disc);
+        Rectangle disc = new Rectangle(L_CENTER - width / 2, 0, width, DISC_HEIGHT)
+            .withColor(Colors.BLUE);
+        add(disc);
         discs[num] = disc;
     }
 
