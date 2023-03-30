@@ -10,6 +10,12 @@ public abstract class GraphicsApp2 extends GraphicsApp {
 
     public abstract void run();
 
+    @Override
+    public void draw() {
+        for (GraphicsObject go : scene) {
+            go.draw();
+        }
+    }
 
     protected static void pause(int delayMs) {
         try {
