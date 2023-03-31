@@ -1,17 +1,15 @@
 package pg2in;
 
-import de.ur.mi.oop.app.GraphicsApp2;
+import de.ur.mi.oop.app.SimpleGraphicsApp;
 import de.ur.mi.oop.colors.Colors;
-import de.ur.mi.oop.graphics.GraphicsObject;
 import de.ur.mi.oop.graphics.Rectangle;
 import de.ur.mi.oop.launcher.GraphicsAppLauncher;
 
-import java.util.Stack;
-
-public class HanoiGfx extends GraphicsApp2 {
+public class HanoiGfx extends SimpleGraphicsApp {
 
     public static final int WIDTH = 900;
     public static final int HEIGHT = 500;
+
     public static final int L_CENTER = WIDTH / 6 * 1;
     public static final int M_CENTER = WIDTH / 6 * 3;
     public static final int R_CENTER = WIDTH / 6 * 5;
@@ -34,16 +32,14 @@ public class HanoiGfx extends GraphicsApp2 {
     private void addRod(int center) {
         int height = (NUM_DISCS + 3) * DISC_HEIGHT;
         int rod_top_y = HEIGHT - BOTTOM_MARGIN - height;
-        Rectangle rod = new Rectangle(center - ROD_WIDTH / 2, rod_top_y, ROD_WIDTH, height)
-            .withColor(Colors.BLACK);
-        add(rod);
+        Rectangle rod = add(new Rectangle(center - ROD_WIDTH / 2, rod_top_y, ROD_WIDTH, height)
+            .withColor(Colors.BLACK));
     }
 
     private void addDisc(int num) {
         int width = ((num + 1) * DISC_BASE_INCR) + DISC_BASE_WIDTH;
-        Rectangle disc = new Rectangle(L_CENTER - width / 2, 0, width, DISC_HEIGHT)
-            .withColor(Colors.BLUE);
-        add(disc);
+        Rectangle disc = add(new Rectangle(L_CENTER - width / 2, 0, width, DISC_HEIGHT)
+            .withColor(Colors.BLUE));
         discs[num] = disc;
     }
 
@@ -91,12 +87,7 @@ public class HanoiGfx extends GraphicsApp2 {
             animate(n, NUM_DISCS - n, 0);
         }
         pause(1000);
-        game.solve(new TowersOfHanoi.StepCallback() {
-            @Override
-            public void step(Stack<Integer> to, int toIndex) {
-                animate(to.peek(), to.size() - 1, toIndex);
-            }
-        });
+        game.solve((to, toIndex) -> animate(to.peek(), to.size() - 1, toIndex));
     }
 
     public static void main(String[] args) {

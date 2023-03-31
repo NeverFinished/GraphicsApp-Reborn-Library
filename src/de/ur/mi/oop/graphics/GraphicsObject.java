@@ -4,8 +4,6 @@ import de.ur.mi.oop.app.GraphicsApp;
 import de.ur.mi.oop.colors.Color;
 import de.ur.mi.oop.colors.Colors;
 
-import java.awt.image.BufferedImage;
-
 /**
  * Diese Klasse ist die gemeinsame Oberklasse aller grafischen Objekte, die in
  * einer GraphicsApp angezeigt werden können. Da es sich um eine abstrakte Klasse handelt, ist es nicht erlaubt,
@@ -33,6 +31,8 @@ public abstract class GraphicsObject {
     protected float strokeWeight;
 
     protected GraphicsObjectType type;
+
+    private boolean visible = true;
 
     ///////////////////////////////////////////////////////////////////////////
     // Constructors
@@ -325,5 +325,13 @@ public abstract class GraphicsObject {
         double dx = object.getXPos() - this.getXPos();
         double dy = object.getYPos() - this.getYPos();
         return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    public boolean isVisible() {
+        return visible;
+    }
+
+    public void setVisible(boolean visible) {
+        this.visible = visible;
     }
 }
