@@ -15,14 +15,15 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * Will be drawn (in order of being added)
  *
  * Instead, you might want to override run(), which is invoked by the main thread
- * after graphics initialization.
+ * after graphics initialization. If so, (mouse click) events can be consumed with
+ * {@link #getNextMouseEvent()}
  *
  * initialize() can be used like in the regular GraphicsApp.
  */
 public abstract class SimpleGraphicsApp extends GraphicsApp {
 
-    private Collection<GraphicsObject> scene = new CopyOnWriteArrayList<>();
-    private Deque<MouseClickedEvent> events = new ConcurrentLinkedDeque<>();
+    private final Collection<GraphicsObject> scene = new CopyOnWriteArrayList<>();
+    private final Deque<MouseClickedEvent> events = new ConcurrentLinkedDeque<>();
 
     public void run() {
     }
@@ -55,7 +56,7 @@ public abstract class SimpleGraphicsApp extends GraphicsApp {
         super.onMousePressed(event);
     }
 
-    public MouseClickedEvent getMouseEvent() {
+    public MouseClickedEvent getNextMouseEvent() {
         return events.size() > 0 ? events.removeFirst() : null;
     }
 

@@ -2,9 +2,7 @@ package pg2in;
 
 import de.ur.mi.oop.app.SimpleGraphicsApp;
 import de.ur.mi.oop.colors.Colors;
-import de.ur.mi.oop.events.GraphicsAppMouseEvent;
 import de.ur.mi.oop.events.MouseClickedEvent;
-import de.ur.mi.oop.events.MousePressedEvent;
 import de.ur.mi.oop.graphics.Circle;
 import de.ur.mi.oop.launcher.GraphicsAppLauncher;
 
@@ -36,7 +34,7 @@ public class BouncingBall extends SimpleGraphicsApp {
                 dy *= -1;
             }
             pause(10);
-            MouseClickedEvent clickedEvent = getMouseEvent();
+            MouseClickedEvent clickedEvent = getNextMouseEvent();
             if (clickedEvent != null) {
                 if (clickedEvent.isRightClick()) {
                     break;

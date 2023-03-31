@@ -17,7 +17,7 @@ public class HanoiGfx extends SimpleGraphicsApp {
     public static final int BOTTOM_MARGIN = 50;
     public static final int ROD_WIDTH = 10;
 
-    public static final int NUM_DISCS = 13;
+    public static final int NUM_DISCS = 8;
 
     public static final int DISC_HEIGHT = 20;
     public static final int DISC_BASE_WIDTH = 80;
