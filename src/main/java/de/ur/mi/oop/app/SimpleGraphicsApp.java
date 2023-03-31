@@ -1,6 +1,7 @@
 package de.ur.mi.oop.app;
 
 import de.ur.mi.oop.graphics.GraphicsObject;
+import de.ur.mi.oop.launcher.GraphicsAppLauncher;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -45,6 +46,5 @@ public abstract class SimpleGraphicsApp extends GraphicsApp {
             throw new RuntimeException(e);
         }
     }
-
 
 }

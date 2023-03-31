@@ -15,13 +15,17 @@ public class GraphicsAppLauncher {
     public static final String PACKAGE_DELIMITER = ".";
 
     public static void launch() {
-        // TODO Find way to move stack tracing to getGraphicsAppInstance() to reduce load time
+        String launcherName = getCallingClassNameFromStacktrace();
+        launch(launcherName);
+    }
+
+    private static String getCallingClassNameFromStacktrace() {
         StackTraceElement[] stackTraceElements = new Exception().getStackTrace();
         String launcherName = stackTraceElements[stackTraceElements.length - 1].getClassName();
         if(launcherName.contains(PACKAGE_DELIMITER)) {
             launcherName = launcherName.substring(launcherName.lastIndexOf(PACKAGE_DELIMITER)+1);
         }
-        launch(launcherName);
+        return launcherName;
     }
 
     public static void launch(String appName) {
