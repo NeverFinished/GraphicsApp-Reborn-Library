@@ -11,6 +11,7 @@ public class BouncingBall extends SimpleGraphicsApp {
     public static final int WIDTH = 800;
     public static final int HEIGHT = 600;
     public static final int RADIUS = 60;
+    public static final int ANIM_DELAY = 10;
 
     Circle ball;
     boolean running = true;
@@ -33,7 +34,7 @@ public class BouncingBall extends SimpleGraphicsApp {
             if (ball.getYPos() >= HEIGHT || ball.getYPos() <= 0) {
                 dy *= -1;
             }
-            pause(10);
+
             MouseClickedEvent clickedEvent = getNextMouseEvent();
             if (clickedEvent != null) {
                 if (clickedEvent.isRightClick()) {
@@ -42,6 +43,8 @@ public class BouncingBall extends SimpleGraphicsApp {
                 ball.setXPos(clickedEvent.getXPos());
                 ball.setYPos(clickedEvent.getYPos());
             }
+
+            pause(ANIM_DELAY);
         }
         System.exit(0);
     }
