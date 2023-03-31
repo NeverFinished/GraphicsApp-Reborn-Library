@@ -15,18 +15,21 @@ public class BouncingBall extends SimpleGraphicsApp {
 
     Circle ball;
     boolean running = true;
-    int dx = 1;
-    int dy = 1;
+    int dx = 2;
+    int dy = 2;
 
     @Override
     public void initialize() {
         setCanvasSize(WIDTH, HEIGHT);
+        setBackgroundColor(Colors.LIGHT_GREY);
         ball = add(new Circle(0, 0, RADIUS, Colors.BLUE));
     }
 
     @Override
     public void run() {
         while (running) {
+            // TODO refactor out methods
+
             ball.move(dx, dy);
             if (ball.getXPos() > WIDTH || ball.getXPos() <= 0) {
                 dx *= -1;

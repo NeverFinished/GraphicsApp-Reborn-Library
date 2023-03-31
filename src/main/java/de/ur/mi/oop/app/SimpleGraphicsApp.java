@@ -1,5 +1,6 @@
 package de.ur.mi.oop.app;
 
+import de.ur.mi.oop.colors.Color;
 import de.ur.mi.oop.events.MouseClickedEvent;
 import de.ur.mi.oop.events.MousePressedEvent;
 import de.ur.mi.oop.graphics.GraphicsObject;
@@ -24,12 +25,16 @@ public abstract class SimpleGraphicsApp extends GraphicsApp {
 
     private final Collection<GraphicsObject> scene = new CopyOnWriteArrayList<>();
     private final Deque<MouseClickedEvent> events = new ConcurrentLinkedDeque<>();
+    private Color backgroundColor;
 
     public void run() {
     }
 
     @Override
     public final void draw() {
+        if (backgroundColor != null) {
+            drawBackground(backgroundColor);
+        }
         for (GraphicsObject go : scene) {
             if (!go.isVisible()) {
                 continue;
@@ -62,5 +67,13 @@ public abstract class SimpleGraphicsApp extends GraphicsApp {
 
     void addToEventQueue(MouseClickedEvent event) {
         events.addLast(event);
+    }
+
+    public Color getBackgroundColor() {
+        return backgroundColor;
+    }
+
+    public void setBackgroundColor(Color backgroundColor) {
+        this.backgroundColor = backgroundColor;
     }
 }

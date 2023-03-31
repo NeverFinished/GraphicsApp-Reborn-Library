@@ -115,4 +115,9 @@ public class Color {
         return awtColor;
     }
 
+    public Color brighter() {
+        // TODO need HSV conversion here, then add something, convert back
+        return new Color(Math.min(255, red + 50), Math.min(255, green + 50), Math.min(255, blue + 50));
+    }
+
 }
