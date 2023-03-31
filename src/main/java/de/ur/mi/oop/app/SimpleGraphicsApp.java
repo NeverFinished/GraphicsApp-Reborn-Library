@@ -1,10 +1,12 @@
 package de.ur.mi.oop.app;
 
+import de.ur.mi.oop.events.MouseClickedEvent;
+import de.ur.mi.oop.events.MousePressedEvent;
 import de.ur.mi.oop.graphics.GraphicsObject;
-import de.ur.mi.oop.launcher.GraphicsAppLauncher;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.*;
+import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * different approach to control the graphics scene:
@@ -19,7 +21,8 @@ import java.util.Collection;
  */
 public abstract class SimpleGraphicsApp extends GraphicsApp {
 
-    private Collection<GraphicsObject> scene = new ArrayList<>();
+    private Collection<GraphicsObject> scene = new CopyOnWriteArrayList<>();
+    private Deque<MouseClickedEvent> events = new ConcurrentLinkedDeque<>();
 
     public void run() {
     }
@@ -47,4 +50,16 @@ public abstract class SimpleGraphicsApp extends GraphicsApp {
         }
     }
 
+    @Override
+    public void onMousePressed(MousePressedEvent event) {
+        super.onMousePressed(event);
+    }
+
+    public MouseClickedEvent getMouseEvent() {
+        return events.size() > 0 ? events.removeFirst() : null;
+    }
+
+    void addToEventQueue(MouseClickedEvent event) {
+        events.addLast(event);
+    }
 }

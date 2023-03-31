@@ -32,18 +32,13 @@ public abstract class GraphicsAppMouseEvent extends Event {
         int xPos = event.getX();
         int yPos = event.getY();
         MouseButton button = MouseButton.values()[event.getButton()];
-        switch(type) {
-            case PRESSED:
-                return new MousePressedEvent(timestamp, xPos, yPos, button);
-            case RELEASED:
-                return new MouseReleasedEvent(timestamp, xPos, yPos, button);
-            case MOVED:
-                return new MouseMovedEvent(timestamp, xPos, yPos);
-            case DRAGGED:
-                return new MouseDraggedEvent(timestamp, xPos, yPos);
-            default:
-                return  null;
-        }
+        return switch (type) {
+            case PRESSED -> new MousePressedEvent(timestamp, xPos, yPos, button);
+            case RELEASED -> new MouseReleasedEvent(timestamp, xPos, yPos, button);
+            case MOVED -> new MouseMovedEvent(timestamp, xPos, yPos);
+            case DRAGGED -> new MouseDraggedEvent(timestamp, xPos, yPos);
+            case CLICKED -> new MouseClickedEvent(timestamp, xPos, yPos, button);
+        };
     }
 
 }

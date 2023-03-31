@@ -154,6 +154,9 @@ public class AppManager implements ConfigChangeListener, ActionListener, KeyList
 
     @Override
     public void mouseClicked(MouseEvent e) {
+        if (app instanceof SimpleGraphicsApp) {
+            ((SimpleGraphicsApp)app).addToEventQueue((MouseClickedEvent) GraphicsAppMouseEvent.createMouseEventFromAWT(e, MouseEventType.CLICKED));
+        }
     }
 
     @Override
