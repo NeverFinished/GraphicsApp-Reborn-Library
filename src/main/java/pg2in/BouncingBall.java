@@ -28,28 +28,35 @@ public class BouncingBall extends SimpleGraphicsApp {
     public void runMain() {
         while (isRunning()) {
 
-            // TODO refactor out methods
+            moveBall();
 
-            ball.move(dx, dy);
-            if (ball.getXPos() > WIDTH || ball.getXPos() <= 0) {
-                dx *= -1;
-            }
-            if (ball.getYPos() >= HEIGHT || ball.getYPos() <= 0) {
-                dy *= -1;
-            }
-
-            MouseClickedEvent clickedEvent = getNextMouseEvent();
-            if (clickedEvent != null) {
-                if (clickedEvent.isRightClick()) {
-                    break;
-                }
-                ball.setXPos(clickedEvent.getXPos());
-                ball.setYPos(clickedEvent.getYPos());
-            }
+            if (maybeMoveBallToMouseClickLocation()) break;
 
             pause(ANIM_DELAY);
         }
         System.exit(0);
+    }
+
+    private boolean maybeMoveBallToMouseClickLocation() {
+        MouseClickedEvent clickedEvent = getNextMouseEvent();
+        if (clickedEvent != null) {
+            if (clickedEvent.isRightClick()) {
+                return true;
+            }
+            ball.setXPos(clickedEvent.getXPos());
+            ball.setYPos(clickedEvent.getYPos());
+        }
+        return false;
+    }
+
+    private void moveBall() {
+        ball.move(dx, dy);
+        if (ball.getXPos() > WIDTH || ball.getXPos() <= 0) {
+            dx *= -1;
+        }
+        if (ball.getYPos() >= HEIGHT || ball.getYPos() <= 0) {
+            dy *= -1;
+        }
     }
 
     public static void main(String[] args) {
