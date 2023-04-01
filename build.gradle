@@ -13,6 +13,6 @@ repositories {
 
 jar {
     archiveBaseName = 'graphicsAppJur'
-    archiveVersion =  '0.0.1'
+    archiveVersion =  '0.0.2'
     exclude('pg2in/**')
 }
