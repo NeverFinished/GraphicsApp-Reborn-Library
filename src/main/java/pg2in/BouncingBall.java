@@ -14,7 +14,6 @@ public class BouncingBall extends SimpleGraphicsApp {
     public static final int ANIM_DELAY = 10;
 
     Circle ball;
-    boolean running = true;
     int dx = 2;
     int dy = 2;
 
@@ -27,7 +26,8 @@ public class BouncingBall extends SimpleGraphicsApp {
 
     @Override
     public void run() {
-        while (running) {
+        while (isRunning()) {
+
             // TODO refactor out methods
 
             ball.move(dx, dy);

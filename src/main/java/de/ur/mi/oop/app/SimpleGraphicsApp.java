@@ -6,8 +6,10 @@ import de.ur.mi.oop.events.MousePressedEvent;
 import de.ur.mi.oop.graphics.GraphicsObject;
 
 import java.util.*;
-import java.util.concurrent.ConcurrentLinkedDeque;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * different approach to control the graphics scene:
@@ -24,8 +26,10 @@ import java.util.concurrent.CopyOnWriteArrayList;
 public abstract class SimpleGraphicsApp extends GraphicsApp {
 
     private final Collection<GraphicsObject> scene = new CopyOnWriteArrayList<>();
-    private final Deque<MouseClickedEvent> events = new ConcurrentLinkedDeque<>();
+    private final BlockingQueue<MouseClickedEvent> events = new LinkedBlockingQueue<>();
+
     private Color backgroundColor;
+    private boolean running;
 
     public void run() {
     }
@@ -62,11 +66,23 @@ public abstract class SimpleGraphicsApp extends GraphicsApp {
     }
 
     public MouseClickedEvent getNextMouseEvent() {
-        return events.size() > 0 ? events.removeFirst() : null;
+        try {
+            return events.poll(0, TimeUnit.MILLISECONDS);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public MouseClickedEvent waitForMouseEvent() {
+        try {
+            return events.take();
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     void addToEventQueue(MouseClickedEvent event) {
-        events.addLast(event);
+        events.offer(event);
     }
 
     public Color getBackgroundColor() {
@@ -75,5 +91,23 @@ public abstract class SimpleGraphicsApp extends GraphicsApp {
 
     public void setBackgroundColor(Color backgroundColor) {
         this.backgroundColor = backgroundColor;
+    }
+
+    public boolean isRunning() {
+        return running;
+    }
+
+    void setRunning(boolean running) {
+        this.running = running;
+    }
+
+    public boolean overridesRun() {
+        try {
+            Class<? extends SimpleGraphicsApp> concreteClass = this.getClass();
+            concreteClass.getDeclaredMethod("run", new Class<?>[0]);
+            return true;
+        } catch (NoSuchMethodException e) {
+            return false;
+        }
     }
 }

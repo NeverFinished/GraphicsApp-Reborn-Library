@@ -38,6 +38,9 @@ public class AppManager implements ConfigChangeListener, ActionListener, KeyList
         this.config = config;
         this.app.setAppManager(this);
         initFrame();
+        if (app instanceof SimpleGraphicsApp) {
+            ((SimpleGraphicsApp)app).setRunning(true);
+        }
     }
 
     public void start() {
@@ -58,7 +61,7 @@ public class AppManager implements ConfigChangeListener, ActionListener, KeyList
         appFrame.setTitle(config.getTitle());
         appFrame.setSize(config.getWidth(), config.getHeight());
         appFrame.setLocationRelativeTo(null);
-        appFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        //appFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         appFrame.setResizable(false);
         appFrame.add(canvas);
         canvas.addMouseListener(this);  // MouseListener auf Canvas, damit Koordinaten Titelleiste nicht beinhalten
@@ -68,6 +71,17 @@ public class AppManager implements ConfigChangeListener, ActionListener, KeyList
         originalCursor = appFrame.getContentPane().getCursor();
         blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(
                 new BufferedImage(16, 16, BufferedImage.TYPE_INT_ARGB), new Point(0, 0), "blank cursor");
+
+        // instead of using DefaultCloseOperation(JFrame.EXIT_ON_CLOSE), allow graceful shutdown of the main thread (running flag for run())
+        appFrame.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                if (app instanceof SimpleGraphicsApp) {  // FIXME get rid of all those instanceof's
+                    ((SimpleGraphicsApp)app).setRunning(false);
+                }
+                System.exit(0);
+            }
+        });
     }
 
     private void startLoop() {
@@ -192,4 +206,5 @@ public class AppManager implements ConfigChangeListener, ActionListener, KeyList
         MouseMovedEvent mouseMovedEvent = (MouseMovedEvent) GraphicsAppMouseEvent.createMouseEventFromAWT(e, MouseEventType.MOVED);
         ((GraphicsAppMouseListener) app).onMouseMoved(mouseMovedEvent);
     }
+
 }

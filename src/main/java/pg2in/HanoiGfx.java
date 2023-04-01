@@ -17,7 +17,7 @@ public class HanoiGfx extends SimpleGraphicsApp {
     public static final int BOTTOM_MARGIN = 50;
     public static final int ROD_WIDTH = 10;
 
-    public static final int NUM_DISCS = 8;
+    public static final int NUM_DISCS = 3;
 
     public static final int DISC_HEIGHT = 20;
     public static final int DISC_BASE_WIDTH = 80;
@@ -32,7 +32,7 @@ public class HanoiGfx extends SimpleGraphicsApp {
     private void addRod(int center) {
         int height = (NUM_DISCS + 3) * DISC_HEIGHT;
         int rod_top_y = HEIGHT - BOTTOM_MARGIN - height;
-        Rectangle rod = add(new Rectangle(center - ROD_WIDTH / 2, rod_top_y, ROD_WIDTH, height)
+        add(new Rectangle(center - ROD_WIDTH / 2, rod_top_y, ROD_WIDTH, height)
             .withColor(Colors.BLACK));
     }
 
@@ -88,6 +88,8 @@ public class HanoiGfx extends SimpleGraphicsApp {
         }
         pause(1000);
         game.solve((to, toIndex) -> animate(to.peek(), to.size() - 1, toIndex));
+        waitForMouseEvent();
+        System.exit(0);
     }
 
     public static void main(String[] args) {
