@@ -17,7 +17,7 @@ import java.util.concurrent.TimeUnit;
  * Do NOT override draw(), but add graphics objects to the instance itself.
  * Will be drawn (in order of being added)
  *
- * Instead, you might want to override run(), which is invoked by the main thread
+ * Instead, you might want to override runMain(), which is invoked by the main thread
  * after graphics initialization. If so, (mouse click) events can be consumed with
  * {@link #getNextMouseEvent()}
  *
@@ -31,7 +31,7 @@ public abstract class SimpleGraphicsApp extends GraphicsApp {
     private Color backgroundColor;
     private boolean running;
 
-    public void run() {
+    public void runMain() {
     }
 
     @Override
@@ -104,7 +104,7 @@ public abstract class SimpleGraphicsApp extends GraphicsApp {
     public boolean overridesRun() {
         try {
             Class<? extends SimpleGraphicsApp> concreteClass = this.getClass();
-            concreteClass.getDeclaredMethod("run", new Class<?>[0]);
+            concreteClass.getDeclaredMethod("runMain", new Class<?>[0]);
             return true;
         } catch (NoSuchMethodException e) {
             return false;

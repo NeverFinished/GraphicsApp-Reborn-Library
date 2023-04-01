@@ -25,7 +25,7 @@ public class BouncingBall extends SimpleGraphicsApp {
     }
 
     @Override
-    public void run() {
+    public void runMain() {
         while (isRunning()) {
 
             // TODO refactor out methods

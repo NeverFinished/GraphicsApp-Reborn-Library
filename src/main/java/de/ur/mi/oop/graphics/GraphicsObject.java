@@ -17,7 +17,6 @@ public abstract class GraphicsObject {
     // Members and constants
     ///////////////////////////////////////////////////////////////////////////
 
-    protected static final Color DEFAULT_COLOR = Colors.RED;
     protected static final Color DEFAULT_BORDER_COLOR = Colors.BLACK;
 
     private float xPos;

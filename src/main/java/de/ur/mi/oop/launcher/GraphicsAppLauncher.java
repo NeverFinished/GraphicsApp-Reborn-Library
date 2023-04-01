@@ -45,9 +45,9 @@ public class GraphicsAppLauncher {
             app.initialize(); // calls GraphicsApp.init once
             appManager.start(); // starts loop to call GraphicsApp.draw repeatedly
             if (app instanceof SimpleGraphicsApp sapp) {
-                sapp.run();
+                sapp.runMain();
                 if (sapp.isRunning() && sapp.overridesRun()) {
-                    System.err.println("Warning: SimpleGraphicsApp.run() returned before window close, intentional?");
+                    System.err.println("Warning: SimpleGraphicsApp.runMain() returned before window close, intentional?");
                 }
             }
         } catch (Exception e) {

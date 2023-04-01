@@ -2,7 +2,6 @@ package pg2in;
 
 import de.ur.mi.oop.app.SimpleGraphicsApp;
 import de.ur.mi.oop.colors.Colors;
-import de.ur.mi.oop.events.MousePressedEvent;
 import de.ur.mi.oop.graphics.Circle;
 import de.ur.mi.oop.launcher.GraphicsAppLauncher;
 
@@ -21,13 +20,18 @@ public class Ampel extends SimpleGraphicsApp {
     private Circle orange;
     private Circle green;
 
-    State currentState = State.RED;
+    AmpelZustand zustand = AmpelZustand.RED;
 
-    enum State {
+    enum AmpelZustand {
         RED,
         RED_ORANGE,
         GREEN,
         ORANGE
+    }
+
+    public void next() {
+        zustand = AmpelZustand.values()[(zustand.ordinal()+1)% AmpelZustand.values().length];
+        System.out.println("current state is: " + zustand);
     }
 
     @Override
@@ -46,29 +50,26 @@ public class Ampel extends SimpleGraphicsApp {
     }
 
     @Override
-    public void onMousePressed(MousePressedEvent event) {
-        next();
-    }
-
-    public void next() {
-        currentState = State.values()[(currentState.ordinal()+1)%State.values().length];
-        System.out.println("current state is: " + currentState);
-
-        updateCircles();
+    public void runMain() {
+        while (isRunning()) {
+            waitForMouseEvent();
+            next();
+            updateCircles();
+        }
     }
 
     private void updateCircles() {
-        if (currentState.name().toLowerCase().contains("red")) {
+        if (zustand.name().toLowerCase().contains("red")) {
             red.setVisible(true);
         } else {
             red.setVisible(false);
         }
-        if (currentState.name().toLowerCase().contains("orange")) {
+        if (zustand.name().toLowerCase().contains("orange")) {
             orange.setVisible(true);
         } else {
             orange.setVisible(false);
         }
-        if (currentState.name().toLowerCase().contains("green")) {
+        if (zustand.name().toLowerCase().contains("green")) {
             green.setVisible(true);
         } else {
             green.setVisible(false);

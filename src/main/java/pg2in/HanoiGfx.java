@@ -81,7 +81,7 @@ public class HanoiGfx extends SimpleGraphicsApp {
     }
 
     @Override
-    public void run() {
+    public void runMain() {
         pause(1000);
         for (int n = NUM_DISCS; n > 0; n--) { // "buildup" animation
             animate(n, NUM_DISCS - n, 0);

@@ -21,7 +21,7 @@ public class RandomClickCircles extends SimpleGraphicsApp {
     }
 
     @Override
-    public void run() {
+    public void runMain() {
         while (isRunning()) {
             if (current != null) {
                 if (grow) {
