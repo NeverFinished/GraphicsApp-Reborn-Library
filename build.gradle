@@ -16,3 +16,8 @@ jar {
     archiveVersion =  '0.0.2'
     exclude('pg2in/**')
 }
+
+javadoc {
+    options.encoding = 'UTF-8'
+    exclude 'pg2in/**'
+}
