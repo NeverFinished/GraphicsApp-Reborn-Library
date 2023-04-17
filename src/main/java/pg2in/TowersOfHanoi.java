@@ -5,8 +5,8 @@ import java.util.Stack;
 
 public class TowersOfHanoi {
 
-    private Stack<Integer>[] stacks = new Stack[3];
-    private int numDiscs;
+    private final Stack<Integer>[] stacks = new Stack[3];
+    private final int numDiscs;
     private StepCallback cb;
 
     public TowersOfHanoi(int numDiscs) {
