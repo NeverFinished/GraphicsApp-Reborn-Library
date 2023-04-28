@@ -18,7 +18,7 @@ public class MouseClickedEvent extends GraphicsAppMouseEvent {
     }
 
     public boolean isLeftClick() {
-        return button == MouseButton.RIGHT;
+        return button == MouseButton.LEFT;
     }
 }
 
