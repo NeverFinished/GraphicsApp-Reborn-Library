@@ -23,6 +23,7 @@ public class CarSimulator extends SimpleGraphicsApp {
 
     private static final int MIN_SPEED = 1;
     private static final int MAX_SPEED = 3;
+    private static final int ANIMATION_PAUSE_MS = 10;
 
     private Car[] cars = new Car[MAX_CARS];
     Random rand = new Random();
@@ -46,7 +47,7 @@ public class CarSimulator extends SimpleGraphicsApp {
             for (Car car : cars) {
                 car.update();
             }
-            pause(10);
+            pause(ANIMATION_PAUSE_MS);
         }
     }
 
