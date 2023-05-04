@@ -1,15 +1,10 @@
 package pg2in;
 
-import de.ur.mi.oop.app.GraphicsApp;
 import de.ur.mi.oop.app.SimpleGraphicsApp;
-import de.ur.mi.oop.colors.Color;
 import de.ur.mi.oop.colors.Colors;
 import de.ur.mi.oop.graphics.Rectangle;
 import de.ur.mi.oop.launcher.GraphicsAppLauncher;
-import examples.Car;
-import examples.GameLoopDemo;
 
-import java.util.ArrayList;
 import java.util.Random;
 
 public class CarSimulator extends SimpleGraphicsApp {
