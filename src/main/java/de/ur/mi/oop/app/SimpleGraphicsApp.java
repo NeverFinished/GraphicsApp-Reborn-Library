@@ -52,6 +52,15 @@ public abstract class SimpleGraphicsApp extends GraphicsApp {
         return graphicsObject;
     }
 
+    protected <T extends GraphicsObject> T remove(T graphicsObject) {
+        scene.remove(graphicsObject);
+        return graphicsObject;
+    }
+
+    protected Collection<GraphicsObject> getScene() {
+        return scene;
+    }
+
     protected static void pause(int delayMs) {
         try {
             Thread.sleep(delayMs);

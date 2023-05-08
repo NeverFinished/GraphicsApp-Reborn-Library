@@ -11,6 +11,10 @@ repositories {
     mavenCentral()
 }
 
+java {
+    withSourcesJar()
+}
+
 jar {
     archiveBaseName = 'graphicsAppJur'
     archiveVersion =  '0.0.2'
