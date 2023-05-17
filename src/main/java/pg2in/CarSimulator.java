@@ -16,8 +16,8 @@ public class CarSimulator extends SimpleGraphicsApp {
     public static final int WINDOW_WIDTH = 1300;
     public static final int WINDOW_HEIGHT = MAX_CARS * (CAR_HEIGHT+CAR_MARGIN);
 
-    private static final int MIN_SPEED = 1;
-    private static final int MAX_SPEED = 3;
+    private static final int MIN_SPEED = 2;
+    private static final int MAX_SPEED = 6;
     private static final int ANIMATION_PAUSE_MS = 10;
 
     private Car[] cars = new Car[MAX_CARS];
@@ -52,18 +52,30 @@ public class CarSimulator extends SimpleGraphicsApp {
 
         public Car(float x, float y, float width, float height) {
             super(x, y, width, height, Colors.getRandomColor());
+            updateSpeed(true);
         }
 
         public void update() {
-            updateSpeed();
             move(speed, 0);
             if (getXPos() > WINDOW_WIDTH) {
                 setXPos(0);
+                // links am rand → komplett neue geschwindigkeit "auswürfeln"
+                updateSpeed(true);
+            } else {
+                // geschwindigkeit sonst nur etwas ändern, -1,0,+1
+                updateSpeed(false);
+
             }
         }
 
-        private void updateSpeed() {
-            speed = rand.nextInt((MAX_SPEED - MIN_SPEED) + 1) + MIN_SPEED;
+        private void updateSpeed(boolean fullRange) {
+            if (fullRange) {
+                speed = rand.nextInt((MAX_SPEED - MIN_SPEED) + 1) + MIN_SPEED;
+            } else {
+                speed += rand.nextInt(3)-1; // [-1,1]
+                // bounding, sonst kann die geschwindigkeit auf 0 fallen
+                speed = Math.min(MAX_SPEED, Math.max(MIN_SPEED, speed));
+            }
         }
 
     }
