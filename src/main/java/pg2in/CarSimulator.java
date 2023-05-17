@@ -5,6 +5,8 @@ import de.ur.mi.oop.colors.Colors;
 import de.ur.mi.oop.graphics.Rectangle;
 import de.ur.mi.oop.launcher.GraphicsAppLauncher;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class CarSimulator extends SimpleGraphicsApp {
@@ -20,7 +22,7 @@ public class CarSimulator extends SimpleGraphicsApp {
     private static final int MAX_SPEED = 6;
     private static final int ANIMATION_PAUSE_MS = 10;
 
-    private Car[] cars = new Car[MAX_CARS];
+    private List<Car> cars = new ArrayList<>();
     Random rand = new Random();
 
     @Override
@@ -31,7 +33,7 @@ public class CarSimulator extends SimpleGraphicsApp {
         for (int i = 0; i < MAX_CARS; i++) {
             Car car = new Car(0, startY, CAR_WIDTH, CAR_HEIGHT);
             startY += (CAR_HEIGHT + CAR_MARGIN);
-            cars[i] = car;
+            cars.add(car);
             add(car);
         }
     }
