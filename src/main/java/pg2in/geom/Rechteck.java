@@ -38,8 +38,7 @@ public class Rechteck extends Figur {
 
 	@Override
 	public GraphicsObject convertToGraphicsObject() {
-		Rectangle ret = new Rectangle(x, y, breite, höhe);
-		ret.setColor(null);
+		Rectangle ret = new Rectangle(x, y, breite, höhe, null);
 		ret.setBorderColor(Colors.BLACK);
 		ret.setBorderWeight(2.0f);
 		return ret;

@@ -34,8 +34,7 @@ public class Kreis extends Figur {
 
 	@Override
 	public GraphicsObject convertToGraphicsObject() {
-		Circle ret = new Circle(x, y, radius);
-		ret.setColor(null);
+		Circle ret = new Circle(x, y, radius, null);
 		ret.setBorderColor(Colors.BLACK);
 		ret.setBorderWeight(2.0f);
 		return ret;
