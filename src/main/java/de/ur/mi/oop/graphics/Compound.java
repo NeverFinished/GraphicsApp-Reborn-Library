@@ -5,6 +5,7 @@ import de.ur.mi.oop.colors.Color;
 import de.ur.mi.oop.colors.Colors;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 
 /**
@@ -79,6 +80,15 @@ public class Compound extends GraphicsObject {
         this(0.0f, 0.0f);
     }
 
+    /**
+     * Erzeugt ein neues Compound-Objekt ohne interne Komponenten an der Stelle (0, 0)
+     * mit den gegebenen GraphicsObjects.
+     */
+    public Compound(GraphicsObject... content) {
+        this(0.0f, 0.0f);
+        Arrays.stream(content).forEach(this::add);
+    }
+
     ///////////////////////////////////////////////////////////////////////////
     // Drawing and Updates
     ///////////////////////////////////////////////////////////////////////////
@@ -120,8 +130,9 @@ public class Compound extends GraphicsObject {
      *
      * @param object Das Grafikobjekt, das hinzugefügt werden soll
      */
-    public void add(GraphicsObject object) {
+    public Compound add(GraphicsObject object) {
         this.objects.add(object);
+        return this;
     }
 
     /**

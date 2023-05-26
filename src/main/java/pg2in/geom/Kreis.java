@@ -4,8 +4,6 @@ import de.ur.mi.oop.colors.Colors;
 import de.ur.mi.oop.graphics.Circle;
 import de.ur.mi.oop.graphics.GraphicsObject;
 
-import java.awt.*;
-
 public class Kreis extends Figur {
 	private int radius;
 	

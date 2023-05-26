@@ -1,6 +1,7 @@
 package pg2in.geom;
 
 import de.ur.mi.oop.colors.Colors;
+import de.ur.mi.oop.graphics.Compound;
 import de.ur.mi.oop.graphics.GraphicsObject;
 import de.ur.mi.oop.graphics.Line;
 
@@ -26,13 +27,13 @@ public class Dreieck extends Figur {
 
     @Override
     public double flaeche() {
-        return (double)seite*seite*Math.sqrt(3.);
+        return (double) seite * seite * Math.sqrt(3.);
     }
 
     @Override
     public Figur hülle() {
-        int höhe = (int) (seite/2.*Math.sqrt(3.));
-        return new Kreis(x+seite/2, y+höhe-(int)(seite/6.*Math.sqrt(3.)), (int)(seite/3.*Math.sqrt(3.))+1 );
+        int höhe = (int) (seite / 2. * Math.sqrt(3.));
+        return new Kreis(x + seite / 2, y + höhe - (int) (seite / 6. * Math.sqrt(3.)), (int) (seite / 3. * Math.sqrt(3.)) + 1);
     }
 
     @Override
@@ -42,18 +43,11 @@ public class Dreieck extends Figur {
 
     @Override
     public GraphicsObject convertToGraphicsObject() {
-         int höhe = (int) (seite/2.*Math.sqrt(3.));
-        Line l1 = new Line(x, y+höhe, x+seite, y+höhe, Colors.BLACK); // Grundlinie
-        Line l2 = new Line(x+seite/2, y, x, y+höhe, Colors.BLACK);
-        Line l3 = new Line(x+seite, y+höhe, x+seite/2, y, Colors.BLACK);
-        return new GraphicsObject(0, 0) {
-            @Override
-            public void draw() {
-                l1.draw();
-                l2.draw();
-                l3.draw();
-            }
-        };
+        int höhe = (int) (seite / 2. * Math.sqrt(3.));
+        Line l1 = new Line(x, y + höhe, x + seite, y + höhe, Colors.BLACK); // Grundlinie
+        Line l2 = new Line(x + seite / 2, y, x, y + höhe, Colors.BLACK);
+        Line l3 = new Line(x + seite, y + höhe, x + seite / 2, y, Colors.BLACK);
+        return new Compound(l1, l2, l3);
     }
 }
 

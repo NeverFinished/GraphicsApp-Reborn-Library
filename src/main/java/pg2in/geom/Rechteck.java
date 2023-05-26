@@ -5,8 +5,6 @@ import de.ur.mi.oop.colors.Colors;
 import de.ur.mi.oop.graphics.GraphicsObject;
 import de.ur.mi.oop.graphics.Rectangle;
 
-import java.awt.*;
-
 public class Rechteck extends Figur {
 	private int breite, höhe;
 	
