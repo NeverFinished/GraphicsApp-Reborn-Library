@@ -58,6 +58,11 @@ public class Label extends GraphicsObject implements RotatableGraphicsObject {
         this.fontSize = fontSize;
     }
 
+    public Label withFontSize(int fontSize) {
+        this.fontSize = fontSize;
+        return this;
+    }
+
     public String getFont() {
         return font;
     }
