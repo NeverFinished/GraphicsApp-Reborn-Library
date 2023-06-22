@@ -12,11 +12,10 @@ import java.util.List;
 
 public class Snake extends SimpleGraphicsApp {
 
-    private static final int WIDTH = 800;
-    private static final int HEIGHT = 600;
+    private static final int WIDTH = 800, HEIGHT = 600;
     private static final int SIZE = 20;
 
-    List<Rectangle> rects = new LinkedList<>();
+    List<Rectangle> snakeRects = new LinkedList<>();
     int xDir = 1, yDir = 0;
 
     @Override
@@ -25,9 +24,8 @@ public class Snake extends SimpleGraphicsApp {
         setFrameRate(20);
         int x = WIDTH / 2;
         int y = HEIGHT / 2;
-        for (int i = 0; i < 5; i++) {
-            rects.add(add(new Rectangle(x, y, SIZE, SIZE, Colors.BLUE)));
-            x += SIZE;
+        for (int i = 0; i < 5; i++, x+= SIZE) {
+            snakeRects.add(add(new Rectangle(x, y, SIZE, SIZE, Colors.BLUE)));
         }
     }
 
@@ -45,7 +43,7 @@ public class Snake extends SimpleGraphicsApp {
     }
 
     private boolean checkCollision(float newX, float newY) {
-        for (Rectangle rect : rects) {
+        for (Rectangle rect : snakeRects) {
             if (newX == rect.getXPos() && newY == rect.getYPos()) {
                 return true;
             }
@@ -54,19 +52,19 @@ public class Snake extends SimpleGraphicsApp {
     }
 
     private boolean move(boolean grow) {
-        Rectangle last = rects.get(rects.size() - 1);
+        Rectangle last = snakeRects.get(snakeRects.size() - 1);
         float newX = constrain((int) (last.getXPos() + (SIZE * xDir)), WIDTH-SIZE);
         float newY = constrain((int) (last.getYPos() + (SIZE * yDir)), HEIGHT-SIZE);
         if (checkCollision(newX, newY)) {
             return true;
         }
         if (grow) {
-            rects.add(add(new Rectangle(newX, newY, SIZE, SIZE, Colors.BLUE)));
+            snakeRects.add(add(new Rectangle(newX, newY, SIZE, SIZE, Colors.BLUE)));
         } else {
-            Rectangle toBeMoved = rects.remove(0);
+            Rectangle toBeMoved = snakeRects.remove(0);
             toBeMoved.setXPos(newX);
             toBeMoved.setYPos(newY);
-            rects.add(toBeMoved);
+            snakeRects.add(toBeMoved);
         }
         return false;
     }
@@ -83,17 +81,13 @@ public class Snake extends SimpleGraphicsApp {
     @Override
     public void onKeyPressed(KeyPressedEvent event) {
         if (event.getKeyChar() == 'w' && yDir == 0) {
-            xDir = 0;
-            yDir = -1;
+            xDir = 0; yDir = -1;
         } else if (event.getKeyChar() == 'a' && xDir == 0) {
-            xDir = -1;
-            yDir = 0;
+            xDir = -1; yDir = 0;
         } else if (event.getKeyChar() == 's' && yDir == 0) {
-            xDir = 0;
-            yDir = 1;
+            xDir = 0; yDir = 1;
         } else if (event.getKeyChar() == 'd' && xDir == 0) {
-            xDir = 1;
-            yDir = 0;
+            xDir = 1; yDir = 0;
         }
     }
 
