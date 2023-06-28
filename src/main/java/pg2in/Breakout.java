@@ -50,7 +50,7 @@ public class Breakout extends SimpleGraphicsApp {
     /* pause time in milliseconds */
     public static final int PAUSE_TIME = 10;
 
-    /* Delay between turns */
+    /* Delay between turns/Runden */
     public static final int TURN_DELAY = 500;
 
     private float vx = 2.0f, vy = 2.0f;
@@ -70,6 +70,8 @@ public class Breakout extends SimpleGraphicsApp {
     }
 
     private void createBricks() {
+        // TODO 10x10 Steine mit den Farben RED, ORANGE, YELLOW, GREEN, CYAN (je zwei Reihen)
+        //  unter Berücksichtigung der Konstanten oben
     }
 
     @Override
@@ -101,10 +103,9 @@ public class Breakout extends SimpleGraphicsApp {
         GraphicsAppLauncher.launch();
     }
 
-    protected GraphicsObject getGObjectAt(float x, float y) {
+    protected GraphicsObject getGObjectAt(float x, float y) { // FIXME ist schon in Compound...? Works with Circle..?
         for (GraphicsObject go : getScene()) {
-            if (go.getXPos() <= x && x < go.getXPos() + go.getWidth()
-            && go.getYPos() <= y && y < go.getYPos() + go.getHeight()) {
+            if (go.hitTest(x, y)) {
                 return go;
             }
         }
