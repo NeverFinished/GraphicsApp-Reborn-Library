@@ -22,6 +22,7 @@ public class Colors {
     public static final Color GREY = new Color(100, 100, 100);
     public static final Color LIGHT_GREY = new Color(200, 200, 200);
     public static final Color TRANSPARENT = new Color(255, 255, 255, 0);
+    public static final Color CYAN = new Color(0, 255, 255);
 
     /**
      * Erzeugt eine zufällige, opake Farbe.
