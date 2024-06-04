@@ -55,7 +55,7 @@ public class NodeViz extends SimpleGraphicsApp {
     public void runMain() {
         while (isRunning()) {
 
-            nodes.values().forEach(n -> n.anim());
+            nodes.values().forEach(VizSensorNode::anim);
 
             pause(ANIM_DELAY);
         }
@@ -86,9 +86,29 @@ public class NodeViz extends SimpleGraphicsApp {
             label.setPosition(ball.getXPos() + LABEL_X_OFFSET, ball.getYPos() + LABEL_Y_OFFSET);
         }
 
+        // 172 32 -1040 2667 21 0 0 0 0 0:-57
         public void parse(String sensorLine) {
-            // 172 32 -1040 2667 21 0 0 0 0 0:-57
+
+            String[] tokens = sensorLine.split(" ");
+            if (tokens.length < 11) {
+                System.err.println("cannot parse: " + sensorLine);
+                return;
+            }
+            int accX = Integer.parseInt(tokens[0]);
+            int accY = Integer.parseInt(tokens[1]);
+            int accZ = Integer.parseInt(tokens[2]);
+            int temp = Integer.parseInt(tokens[3]);
+            int lightLevel = Integer.parseInt(tokens[4]);
+            int soundLevel = Integer.parseInt(tokens[5]);
+            int buttonA = Integer.parseInt(tokens[6]);
+            int buttonB = Integer.parseInt(tokens[7]);
+            int touch1 = Integer.parseInt(tokens[8]);
+            int touch2 = Integer.parseInt(tokens[9]);
+            //int touch3 = Integer.parseInt(tokens[10]); // TODO replace : with space
+
             // TODO
+
+            label.setText(sensorLine);
         }
     }
 
