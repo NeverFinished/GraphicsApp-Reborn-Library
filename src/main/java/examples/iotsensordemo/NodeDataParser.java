@@ -1,4 +1,4 @@
-package pg2in;
+package examples.iotsensordemo;
 
 public class NodeDataParser {
 

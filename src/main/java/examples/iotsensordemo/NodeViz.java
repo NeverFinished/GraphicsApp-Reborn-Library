@@ -1,4 +1,4 @@
-package pg2in;
+package examples.iotsensordemo;
 
 import de.ur.mi.oop.app.SimpleGraphicsApp;
 import de.ur.mi.oop.colors.Colors;
@@ -23,11 +23,12 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
     public static final int BAR_HEIGHT = 180;
     public static final char MAX_CHAR = 'Y';
     static final int LP_FACTOR = 4;
+    public static final int MAX_COMM_DST = 300;
 
     public static int width = 1200;
     public static int height = 800;
 
-    boolean gravity, showLines = true, showRSSI = true;
+    boolean gravity, dynamicConnections, showLines = true, showRSSI = true;
     LabelMode labelMode = LabelMode.LINE;
     char activeKey = 0;
 
@@ -61,6 +62,13 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
         });
         setDrawAdapter(this);
 
+        buildStandardNodeConnections();
+
+        //StdIn.pass(s -> parseLine(s));
+        //new Serial(false).connect(this::parseLine);
+    }
+
+    private void buildStandardNodeConnections() {
         var lines = new LinkedHashSet<NodePair>();
         for (int x1 = 0; x1 < 5; x1++) { // TODO instead of static - keep connection to the closest three nodes
             for (int y1 = 0; y1 < 5; y1++) {
@@ -90,9 +98,6 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
                 this.lines.add(new NodePair(np.r, np.l));
             }
         }
-
-        //StdIn.pass(s -> parseLine(s));
-        new Serial(false).connect(this::parseLine);
     }
 
     private void parseLine(String line) {
@@ -109,6 +114,11 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
 
             nodes.values().forEach(VizSensorNode::anim);
 
+            if (dynamicConnections && getFrameCounter() % 10 == 0) {
+                var all = nodes.values().toArray(new VizSensorNode[0]);
+                (all[(int) (Math.random() * all.length)]).validateConnections();
+            }
+
             pause(ANIM_DELAY);
         }
         System.exit(0);
@@ -119,28 +129,12 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
         if (showLines) {
             Stroke stroke = new BasicStroke(1);
             g2d.setStroke(stroke);
-            for (NodePair np : lines) {
-                g2d.setColor(Colors.GREEN.asAWTColor().darker());
-                float x1 = np.l.main.getXPos();
-                float y1 = np.l.main.getYPos();
-                float x2 = np.r.main.getXPos();
-                float y2 = np.r.main.getYPos();
-                g2d.drawLine((int) x1, (int) y1, (int) x2, (int) y2);
-                g2d.setColor(Colors.GREEN.asAWTColor());
-                try {
-                    double dst = Point2D.distance(x1, y1, x2, y2);
-                    long tmp = getFrameCounter() + np.l.fcOffset + np.r.fcOffset;
-                    double scale = tmp % (2L * dst);
-                    if (scale > 0 && scale < dst) {
-                        double[] pc = GeometricHelper.cartesianToPolar(x2 - x1, y2 - y1);
-                        double[] scaled = GeometricHelper.scalePolarAndConvertToCartesian(pc[0], pc[1], scale / dst);
-                        g2d.fillOval((int) (x1 + scaled[0]) - 2, (int) (y1 + scaled[1]) - 2, 5, 5);
-                    }
-                } catch (ArithmeticException e) {
-                    System.err.println(e.getMessage());
-                }
+            if (dynamicConnections) {
+                nodes.values().forEach(n -> drawDynamicConnections(g2d, n));
+            } else {
+                lines.forEach(n -> drawFixedConnection(g2d, n));
             }
-        } else {
+        } else { // show moving vectors (from accel)
             Stroke stroke = new BasicStroke(2);
             g2d.setStroke(stroke);
             g2d.setColor(Colors.CYAN.asAWTColor().darker());
@@ -153,11 +147,46 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
                 double[] scaled = GeometricHelper.scalePolarAndConvertToCartesian(pc[0], pc[1], vsn.node.getRadius(), 10);
                 x2 = (float) (x1 + scaled[0]);
                 y2 = (float) (y1 + scaled[1]);
-                g2d.drawLine((int) x1, (int) y1,(int) x2, (int) y2);
+                g2d.drawLine((int) x1, (int) y1, (int) x2, (int) y2);
                 Shape arrowHead = Arrow.createArrowShape(new Point2D.Double(x1, y1), new Point2D.Double(x2, y2));
                 g2d.fill(arrowHead);
             }
+        }
+    }
 
+    private void drawDynamicConnections(Graphics2D g2d, VizSensorNode n) {
+        // TODO move to vsn?
+        for (VizSensorNode o : n.dynNeighbor) {
+            drawConnection(g2d, n.main.getXPos(), n.main.getYPos(),
+                    o.main.getXPos(), o.main.getYPos(), n.fcOffset + o.fcOffset);
+        }
+
+    }
+
+    private void drawFixedConnection(Graphics2D g2d, NodePair np) {
+        g2d.setColor(Colors.GREEN.asAWTColor().darker());
+        float x1 = np.l.main.getXPos();
+        float y1 = np.l.main.getYPos();
+        float x2 = np.r.main.getXPos();
+        float y2 = np.r.main.getYPos();
+        drawConnection(g2d, x1, y1, x2, y2, np.l.fcOffset + np.r.fcOffset);
+    }
+
+    private void drawConnection(Graphics2D g2d, float x1, float y1, float x2, float y2, long fcOffset) {
+        g2d.drawLine((int) x1, (int) y1, (int) x2, (int) y2);
+        g2d.setColor(Colors.GREEN.asAWTColor());
+        try {
+            double dst = Point2D.distance(x1, y1, x2, y2);
+            long tmp = getFrameCounter() + fcOffset;
+            double scale = tmp % (2L * dst);
+            if (scale > 0 && scale < dst) {
+                // TODO something still jitters, sometimes doubled
+                double[] pc = GeometricHelper.cartesianToPolar(x2 - x1, y2 - y1);
+                double[] scaled = GeometricHelper.scalePolarAndConvertToCartesian(pc[0], pc[1], scale / dst);
+                g2d.fillOval((int) (x1 + scaled[0]) - 2, (int) (y1 + scaled[1]) - 2, 5, 5);
+            }
+        } catch (ArithmeticException e) {
+            System.err.println(e.getMessage());
         }
     }
 
@@ -173,6 +202,7 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
         Compound main;
         int fcOffset = (int) (Math.random() * 200); // "average" distance
         long lastParsed;
+        Set<VizSensorNode> dynNeighbor = new LinkedHashSet<>();
 
         @Override
         public boolean equals(Object o) {
@@ -230,9 +260,9 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
             int id = key - 'A';
             int gridX = id % 5;
             int gridY = id / 5;
-            float px = (gridX + 1) * width / 6f;
+            float px = (0.5f + gridX) * width / 5f;
             px += (float) (Math.random() * 20f) * (Math.random() > 0.5 ? 1 : -1);
-            float py = (gridY + 1) * height / 7f; // leave a empty row at bottom
+            float py = (0.5f + gridY) * height / 6f; // leave a empty row at bottom
             dx = 0; // also reset any movement
             dy = 0;
             return new float[]{px, py};
@@ -339,6 +369,56 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
             }
             lastParsed = System.currentTimeMillis();
         }
+
+        public void validateConnections() {
+
+            for (VizSensorNode vsn : new ArrayList<>(dynNeighbor)) {
+                double distance = Point2D.distance(main.getXPos(), main.getYPos(), // too far away
+                        vsn.main.getXPos(), vsn.main.getYPos());
+                if (distance > MAX_COMM_DST) {
+                    dynNeighbor.remove(vsn);
+                    break; // only one at a time
+                }
+                if (isBlocked(vsn)) { // some "block" inbetween?
+                    dynNeighbor.remove(vsn);
+                    break; // only one at a time
+                }
+            }
+            if (dynNeighbor.size() == 3) {
+                return;
+            }
+            // find ONE new
+            VizSensorNode closest = null;
+            double closestDistance = MAX_COMM_DST + 1;
+            for (VizSensorNode vsn : nodes.values()) {
+                if (dynNeighbor.contains(vsn) || vsn.dynNeighbor.contains(this) || isBlocked(vsn)) {
+                    continue;
+                }
+                double distance = Point2D.distance(main.getXPos(), main.getYPos(),
+                        vsn.main.getXPos(), vsn.main.getYPos());
+                if (distance < closestDistance) {
+                    closest = vsn;
+                    closestDistance = distance;
+                }
+            }
+            if (closest != null) {
+                dynNeighbor.add(closest);
+            }
+        }
+
+        private boolean isBlocked(VizSensorNode vsn) {
+            double distance = Point2D.distance(main.getXPos(), main.getYPos(),
+                    vsn.main.getXPos(), vsn.main.getYPos());
+            for (VizSensorNode third : nodes.values()) {
+                if (third == this || third == vsn) continue;
+                double dst1 = Point2D.distanceSq(main.getXPos(), main.getYPos(),
+                        third.main.getXPos(), third.main.getYPos());
+                double dst2 = Point2D.distanceSq(third.main.getXPos(), third.main.getYPos(),
+                        vsn.main.getXPos(), vsn.main.getYPos());
+                if (dst1 + dst2 < 1.1 * distance * distance) return true;
+            }
+            return false;
+        }
     }
 
     @Override
@@ -357,6 +437,11 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
             gravity = !gravity;
         } else if (keyChar == 'r') {
             showRSSI = !showRSSI;
+        } else if (keyChar == 'd') {
+            dynamicConnections = !dynamicConnections;
+            if (!dynamicConnections) {
+                nodes.values().forEach(n -> n.dynNeighbor.clear());
+            }
         } else if (keyChar == 'p') {
             nodes.values().forEach(n -> {
                 float[] pxpy = n.resetPos();

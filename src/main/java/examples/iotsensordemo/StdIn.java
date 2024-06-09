@@ -1,4 +1,4 @@
-package pg2in;
+package examples.iotsensordemo;
 
 import java.io.BufferedReader;
 import java.io.IOException;
