@@ -4,6 +4,8 @@ import de.ur.mi.oop.app.SimpleGraphicsApp;
 import de.ur.mi.oop.colors.Colors;
 import de.ur.mi.oop.graphics.Circle;
 import de.ur.mi.oop.graphics.Label;
+import de.ur.mi.oop.graphics.Line;
+import de.ur.mi.oop.graphics.Rectangle;
 import de.ur.mi.oop.launcher.GraphicsAppLauncher;
 
 import java.io.BufferedReader;
@@ -16,7 +18,7 @@ public class NodeViz extends SimpleGraphicsApp {
 
     public static final int WIDTH = 1200;
     public static final int HEIGHT = 800;
-    public static final int RADIUS = 8;
+    public static final int RADIUS = 26;
     public static final int ANIM_DELAY = 20;
     public static final int LABEL_X_OFFSET = 15;
     public static final int LABEL_Y_OFFSET = -10;
@@ -27,7 +29,7 @@ public class NodeViz extends SimpleGraphicsApp {
     public void initialize() {
         setCanvasSize(WIDTH, HEIGHT);
         setBackgroundColor(Colors.BLACK);
-        for (char c = 'A'; c <= 'Z'; c++) {
+        for (char c = 'A'; c <= 'Y'; c++) {
             nodes.put(c, new VizSensorNode(c));
         }
         new Thread(() -> {
@@ -66,10 +68,16 @@ public class NodeViz extends SimpleGraphicsApp {
     class VizSensorNode {
 
         char key;
-        float dx = (float) (Math.random() * .15) * (Math.random() > 0.5 ? 1 : -1);
-        float dy = (float) (Math.random() * .15) * (Math.random() > 0.5 ? 1 : -1);
-        Circle ball;
+        float dx, dy;
+        Circle node;
         Label label;
+        Line xyVec;
+        Rectangle left, right;
+
+        void jitter() {
+            dx = (float) (Math.random() * .15) * (Math.random() > 0.5 ? 1 : -1);
+            dy = (float) (Math.random() * .15) * (Math.random() > 0.5 ? 1 : -1);
+        }
 
         public VizSensorNode(char key) {
             this.key = key;
@@ -78,19 +86,26 @@ public class NodeViz extends SimpleGraphicsApp {
             int gridY = id / 5;
             float px = (gridX+1) * WIDTH / 6f;
             float py = (gridY+1) * HEIGHT / 6f;
-            ball = add(new Circle(px, py, RADIUS, Colors.BLUE));
-            label = add(new Label(px + LABEL_X_OFFSET, py + LABEL_Y_OFFSET, "" + key));
+            left = add(new Rectangle(px, py-16, 32, 32, Colors.getRandomColor()));
+            right = add(new Rectangle(px-32, py-16, 32, 32, Colors.getRandomColor()));
+            node = add(new Circle(px, py, RADIUS, Colors.LIGHT_GREY));
+            label = add(new Label(px, py, "" + key));
+            xyVec = add(new Line(px, py, px, py, Colors.GREY));
         }
 
         void anim() {
-            ball.move(dx, dy);
-            if (ball.getXPos() > WIDTH || ball.getXPos() <= 0) {
+            if (getFrameCounter() % 32 == key - 'A') jitter();
+            node.move(dx, dy);
+            if (node.getXPos() > WIDTH || node.getXPos() <= 0) {
                 dx *= -1;
             }
-            if (ball.getYPos() >= HEIGHT || ball.getYPos() <= 0) {
+            if (node.getYPos() >= HEIGHT || node.getYPos() <= 0) {
                 dy *= -1;
             }
-            label.setPosition(ball.getXPos() + LABEL_X_OFFSET, ball.getYPos() + LABEL_Y_OFFSET);
+            label.setPosition(node.getXPos()-8, node.getYPos()+8);
+            xyVec.setPosition(node.getPosition());
+            left.setPosition(node.getXPos(), node.getYPos()-16);
+            right.setPosition(node.getXPos()-32, node.getYPos()-16);
         }
 
         // A -8 564 -892 29 0 0 0 -33
@@ -113,6 +128,10 @@ public class NodeViz extends SimpleGraphicsApp {
             // TODO
 
             label.setText(sensorLine);
+            node.setRadius(temp);
+            // TODO xyVec
+            left.setVisible(buttonA > 0);
+            right.setVisible(buttonB > 0);
         }
     }
 
