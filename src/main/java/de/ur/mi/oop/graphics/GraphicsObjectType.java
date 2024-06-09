@@ -6,7 +6,7 @@ package de.ur.mi.oop.graphics;
  */
 public enum GraphicsObjectType {
     NONE,
-    COMPOUND,
+    COMPOUND, // TODO actually should translate!
     BACKGROUND,
     LINE,
     RECTANGLE,

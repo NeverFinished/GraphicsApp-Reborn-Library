@@ -3,6 +3,7 @@ package de.ur.mi.oop.app;
 import de.ur.mi.oop.colors.Color;
 import de.ur.mi.oop.events.MouseClickedEvent;
 import de.ur.mi.oop.events.MousePressedEvent;
+import de.ur.mi.oop.graphics.DrawAdapter;
 import de.ur.mi.oop.graphics.GraphicsObject;
 
 import java.util.*;
@@ -119,4 +120,5 @@ public abstract class SimpleGraphicsApp extends GraphicsApp {
             return false;
         }
     }
+
 }

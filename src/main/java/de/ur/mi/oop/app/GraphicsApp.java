@@ -3,6 +3,7 @@ package de.ur.mi.oop.app;
 import de.ur.mi.oop.colors.Color;
 import de.ur.mi.oop.events.*;
 import de.ur.mi.oop.graphics.Background;
+import de.ur.mi.oop.graphics.DrawAdapter;
 
 import java.awt.event.MouseEvent;
 
@@ -34,6 +35,8 @@ public abstract class GraphicsApp extends GraphicsAppCore implements GraphicsApp
 
     private Background background;
     private long frameCounter;
+    private DrawAdapter drawAdapter;
+
 
     public GraphicsApp() {
         super();
@@ -150,5 +153,13 @@ public abstract class GraphicsApp extends GraphicsAppCore implements GraphicsApp
 
     public long getFrameCounter() {
         return frameCounter;
+    }
+
+    public DrawAdapter getDrawAdapter() {
+        return drawAdapter;
+    }
+
+    public void setDrawAdapter(DrawAdapter drawAdapter) {
+        this.drawAdapter = drawAdapter;
     }
 }

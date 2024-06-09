@@ -51,6 +51,7 @@ public class AppManager implements ConfigChangeListener, ActionListener, KeyList
         app.draw();
         app.incrementFrameCounter();
         canvas.setComponents(app.getDrawBuffer());
+        canvas.setDrawAdapter(app.getDrawAdapter());
         canvas.repaint();
         app.clearDrawBuffer();
     }
@@ -207,4 +208,7 @@ public class AppManager implements ConfigChangeListener, ActionListener, KeyList
         ((GraphicsAppMouseListener) app).onMouseMoved(mouseMovedEvent);
     }
 
+    public JFrame getAppFrame() {
+        return appFrame;
+    }
 }

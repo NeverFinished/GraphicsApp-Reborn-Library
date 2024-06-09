@@ -7,6 +7,8 @@ import de.ur.mi.oop.colors.Color;
  */
 public class Rectangle extends GraphicsObject {
 
+    double rotation;
+
     /**
      * Konstruiert ein neues Rechteck mit der angegebenen Breite, Höhe, und Farbe,
      * das an den Koordinaten x und y positioniert ist.
@@ -43,5 +45,17 @@ public class Rectangle extends GraphicsObject {
     public Rectangle withColor(Color color) {
         setColor(color);
         return this;
+    }
+
+    public void rotate(double degrees) {
+        rotation += degrees;
+    }
+
+    public double getRotation() {
+        return rotation;
+    }
+
+    public void setRotation(double degrees) {
+        this.rotation = degrees;
     }
 }

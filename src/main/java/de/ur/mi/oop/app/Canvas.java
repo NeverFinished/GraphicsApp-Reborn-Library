@@ -20,6 +20,7 @@ public class Canvas extends JPanel {
 
     private GraphicsObject[] components;
     private RenderingHints renderingHints;
+    private DrawAdapter drawAdapter;
 
     public Canvas() {
         this.setOpaque(false);
@@ -37,12 +38,21 @@ public class Canvas extends JPanel {
         this.components = components;
     }
 
+    public void setDrawAdapter(DrawAdapter drawAdapter) {
+        this.drawAdapter = drawAdapter;
+    }
+
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHints(renderingHints);
+        AffineTransform orig = g2d.getTransform();
         draw(g2d);
+        g2d.setTransform(orig);
+        if (drawAdapter != null) {
+            drawAdapter.draw(g2d);
+        }
     }
 
     private void draw(Graphics2D g2d) {
@@ -161,13 +171,20 @@ public class Canvas extends JPanel {
     }
 
     private void drawRectangle(Graphics2D g2d, de.ur.mi.oop.graphics.Rectangle rect) {
+        AffineTransform at = null;
+        if (rect.getRotation() != 0.0) {
+            at = g2d.getTransform();
+            g2d.rotate(Math.toRadians(rect.getRotation()), rect.getXPos() + rect.getWidth() / 2.0, rect.getYPos() + rect.getHeight() / 2.0);
+        }
         Rectangle2D rectShape = new Rectangle.Float(
                 rect.getXPos(),
                 rect.getYPos(),
                 rect.getWidth(),
                 rect.getHeight());
-
         drawShape(g2d, rect, rectShape);
+        if (at != null) {
+            at.setTransform(at);
+        }
     }
 
     private void drawShape(Graphics2D g2d, GraphicsObject graphicsObject, Shape shape) {
