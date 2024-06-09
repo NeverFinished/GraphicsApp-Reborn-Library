@@ -6,8 +6,6 @@ import java.awt.geom.*;
 public class Arrow {
     public static Shape createArrowShape(Point2D fromPt, Point2D toPt) {
         float arrowWidth = 10.0f;
-        float theta = 0.423f;
-        int[] arrowHead = { 0, 1, -1, 0 };
 
         AffineTransform transform = new AffineTransform();
         GeneralPath path = new GeneralPath();

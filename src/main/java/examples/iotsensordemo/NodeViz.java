@@ -6,7 +6,6 @@ import de.ur.mi.oop.events.KeyPressedEvent;
 import de.ur.mi.oop.events.MouseDraggedEvent;
 import de.ur.mi.oop.events.MousePressedEvent;
 import de.ur.mi.oop.graphics.*;
-import de.ur.mi.oop.graphics.Label;
 import de.ur.mi.oop.graphics.Point;
 import de.ur.mi.oop.graphics.Rectangle;
 import de.ur.mi.oop.launcher.GraphicsAppLauncher;
@@ -34,7 +33,7 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
 
     Map<Character, VizSensorNode> nodes = new LinkedHashMap<>(); // TODO color mapping
     Collection<NodePair> lines = new ArrayList<>();
-    private Rectangle bar;
+    Rectangle bar;
 
     record NodePair(VizSensorNode l, VizSensorNode r) {
     }
@@ -49,7 +48,9 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
         height = bounds.height - 64;
         setBackgroundColor(Colors.BLACK);
         for (char c = 'A'; c <= MAX_CHAR; c++) {
-            nodes.put(c, new VizSensorNode(c));
+            VizSensorNode vsn = new VizSensorNode(this, c);
+            add(vsn.init());
+            nodes.put(c, vsn);
         }
         bar = add(new Rectangle(-50, height - BAR_HEIGHT, width + 100, BAR_HEIGHT, Colors.BLACK.brighter().brighter()) {
             @Override
@@ -114,9 +115,13 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
 
             nodes.values().forEach(VizSensorNode::anim);
 
-            if (dynamicConnections && getFrameCounter() % 10 == 0) {
+            if (dynamicConnections && getFrameCounter() % 8 == 0) {
                 var all = nodes.values().toArray(new VizSensorNode[0]);
-                (all[(int) (Math.random() * all.length)]).validateConnections();
+                try {
+                    (all[(int) (Math.random() * all.length)]).validateConnections();
+                } catch (ArrayIndexOutOfBoundsException e) {
+                    System.err.println(e.getMessage());
+                }
             }
 
             pause(ANIM_DELAY);
@@ -155,7 +160,6 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
     }
 
     private void drawDynamicConnections(Graphics2D g2d, VizSensorNode n) {
-        // TODO move to vsn?
         for (VizSensorNode o : n.dynNeighbor) {
             drawConnection(g2d, n.main.getXPos(), n.main.getYPos(),
                     o.main.getXPos(), o.main.getYPos(), n.fcOffset + o.fcOffset);
@@ -190,237 +194,6 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
         }
     }
 
-    class VizSensorNode {
-
-        char key;
-        float dx, dy;
-        Arc arc;
-        Circle node;
-        Label label;
-        Line xyVec;
-        Rectangle left, right;
-        Compound main;
-        int fcOffset = (int) (Math.random() * 200); // "average" distance
-        long lastParsed;
-        Set<VizSensorNode> dynNeighbor = new LinkedHashSet<>();
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            VizSensorNode that = (VizSensorNode) o;
-            return key == that.key;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(key);
-        }
-
-        @Override
-        public String toString() {
-            return "" + key;
-        }
-
-        void jitter() {
-            float newDx = (float) (Math.random() * .1) * (Math.random() > 0.5 ? 1 : -1);
-            float newDy = (float) (Math.random() * .1) * (Math.random() > 0.5 ? 1 : -1);
-            if (dx > 0.1 || dy > 0.1) { // moving
-                dx = ((LP_FACTOR - 1) * dx + newDx) / LP_FACTOR;
-                dy = ((LP_FACTOR - 1) * dy + newDy) / LP_FACTOR;
-            } else {
-                dx = newDx;
-                dy = newDy;
-            }
-        }
-
-        public VizSensorNode(char key) {
-            this.key = key;
-            float[] pxpy = resetPos();
-            main = add(new Compound(pxpy[0], pxpy[1]));
-            arc = main.addRelative(new Arc(0, 0, 21 + 8, 90, 120, Colors.ORANGE, false));
-
-            right = main.addRelative(new Rectangle(0, -16, 36, 32, Colors.getRandomColor()));
-            left = main.addRelative(new Rectangle(-36, -16, 36, 32, Colors.getRandomColor()));
-
-            right.setVisible(false);
-            left.setVisible(false);
-
-            node = main.addRelative(new Circle(0, 0, 21, Colors.LIGHT_GREY));
-            label = main.addRelative(new Label(-8, 8, "" + key));
-            xyVec = main.addRelative(new Line(0, 0, dx, dy, Colors.GREY));
-            xyVec.setVisible(false); // TODO buggy
-        }
-
-        private float[] resetPos() {
-            int id = key - 'A';
-            int gridX = id % 5;
-            int gridY = id / 5;
-            float px = (0.5f + gridX) * width / 5f;
-            px += (float) (Math.random() * 20f) * (Math.random() > 0.5 ? 1 : -1);
-            float py = (0.5f + gridY) * height / 6f; // leave a empty row at bottom
-            dx = 0; // also reset any movement
-            dy = 0;
-            return new float[]{px, py};
-        }
-
-
-        void anim() {
-            if (gravity) {
-                dx = ((LP_FACTOR - 1) * dx) / LP_FACTOR;
-                if (barIntersect(-1).length == 0) { // TODO silent stopping buggy - okay for now
-                    dy += 0.1;
-                    // TODO einfallswinkel = ausfallswinkel
-                } else { // "abrutschen"
-                    dx = (float) (bar.getRotation() / 10);
-                }
-            } else {
-                if (getFrameCounter() % 16 == key - 'A') {
-                    jitter();
-                }
-            }
-            main.move(dx, dy);
-
-            label.setVisible(labelMode != LabelMode.NONE);
-            bar.setVisible(gravity);
-            if (main.getXPos() + node.getRadius() > width || main.getXPos() - node.getRadius() <= 0) {
-                dx *= -1;
-                while (main.getXPos() + node.getRadius() > width) {
-                    main.move(-1, 0);
-                }
-                while (main.getXPos() - node.getRadius() <= 0) {
-                    main.move(1, 0);
-                }
-            }
-            if (gravity) {
-                if (main.getYPos() <= 0) {
-                    dy *= -1;
-                    if (main.getYPos() >= height) {
-                        main.setYPos(height - 8);
-                    }
-                } else {
-                    double[] i = barIntersect();
-
-                    if (i.length > 0) {
-                        dy *= -0.75;
-                        double rel = (2.0 * main.getXPos() / width) - 1.0;
-                        if (isActive()) { // only for nodes that are in the network
-                            bar.rotate(Math.min(1, Math.abs(dy)) * rel / 10);
-                        }
-                        while (barIntersect().length > 1) {
-                            main.setYPos(main.getYPos() - 1);
-                        }
-                    }
-                }
-            } else {
-                if (main.getYPos() >= height || main.getYPos() <= 0) {
-                    dy *= -1;
-                    while (main.getYPos() >= height) {
-                        main.setYPos(main.getYPos() - 4);
-                    }
-                }
-            }
-            xyVec.setEndPoint(main.getXPos() + dx, main.getYPos() + dy);
-        }
-
-        private boolean isActive() {
-            return System.currentTimeMillis() - lastParsed < 500;
-        }
-
-        private double[] barIntersect() {
-            return barIntersect(0);
-        }
-
-        private double[] barIntersect(int offset) {
-            double m = Math.tan(Math.toRadians(bar.getRotation()));
-            double b = GeometricHelper.calculateIntercept(m, width / 2.0, height - BAR_HEIGHT);
-            b += offset;
-            return GeometricHelper.findLineCircleIntersections(main.getXPos(), main.getYPos(), node.getRadius(), m, b);
-        }
-
-        // A -8 564 -892 29 0 0 0 -33
-        // A -48 480 932 33 0 0 0
-        public void parse(String sensorLine) {
-
-            var nd = NodeDataParser.parse(sensorLine);
-            if (nd != null) {
-                if (nd.anyButtonPressed()) {
-                    dx = (float) (-1 * nd.roll / 10);
-                    dy = (float) (nd.pitch / 10);
-                }
-
-                if (labelMode == LabelMode.LINE) {
-                    label.setText(sensorLine + String.format(" %.2f %.2f", nd.pitch, nd.roll));
-                } else {
-                    label.setText("" + key);
-                }
-                node.setRadius(nd.temp);
-                arc.setRadius(nd.temp + 8);
-                left.setVisible(nd.buttonA > 0);
-                right.setVisible(nd.buttonB > 0);
-                arc.setEnd(nd.rssiScaled());
-                arc.setVisible(isActive());
-
-                //xyVec.setEndPoint(dx, dy);
-            }
-            lastParsed = System.currentTimeMillis();
-        }
-
-        public void validateConnections() {
-
-            for (VizSensorNode vsn : new ArrayList<>(dynNeighbor)) {
-                double distance = Point2D.distance(main.getXPos(), main.getYPos(), // too far away
-                        vsn.main.getXPos(), vsn.main.getYPos());
-                if (distance > MAX_COMM_DST) {
-                    dynNeighbor.remove(vsn);
-                    break; // only one at a time
-                }
-                if (isBlocked(vsn)) { // some "block" inbetween?
-                    dynNeighbor.remove(vsn);
-                    break; // only one at a time
-                }
-            }
-            if (dynNeighbor.size() == 3) {
-                return;
-            }
-            // find ONE new
-            VizSensorNode closest = null;
-            double closestDistance = MAX_COMM_DST + 1;
-            for (VizSensorNode vsn : nodes.values()) {
-                if (dynNeighbor.contains(vsn) || vsn.dynNeighbor.contains(this) || isBlocked(vsn)) {
-                    continue;
-                }
-                double distance = Point2D.distance(main.getXPos(), main.getYPos(),
-                        vsn.main.getXPos(), vsn.main.getYPos());
-                if (distance < closestDistance) {
-                    closest = vsn;
-                    closestDistance = distance;
-                }
-            }
-            if (closest != null) {
-                dynNeighbor.add(closest);
-            }
-        }
-
-        private boolean isBlocked(VizSensorNode vsn) {
-            double distance = Point2D.distance(main.getXPos(), main.getYPos(),
-                    vsn.main.getXPos(), vsn.main.getYPos());
-            for (VizSensorNode third : nodes.values()) {
-                if (third == this || third == vsn) continue;
-                double dst1 = Point2D.distanceSq(main.getXPos(), main.getYPos(),
-                        third.main.getXPos(), third.main.getYPos());
-                double dst2 = Point2D.distanceSq(third.main.getXPos(), third.main.getYPos(),
-                        vsn.main.getXPos(), vsn.main.getYPos());
-                if (dst1 + dst2 < 1.1 * distance * distance) return true;
-            }
-            return false;
-        }
-    }
-
     @Override
     public void onKeyPressed(KeyPressedEvent event) {
         char keyChar = event.getKeyChar();
@@ -450,7 +223,6 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
             });
             bar.setRotation(0);
         }
-
     }
 
     @Override
