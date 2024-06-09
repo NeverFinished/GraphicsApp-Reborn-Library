@@ -101,7 +101,7 @@ public class Compound extends GraphicsObject {
         drawBackground();
 
         for (GraphicsObject object : this.objects) {
-            GraphicsApp.getApp().addToDrawBuffer(object);
+            if (object.isVisible()) GraphicsApp.getApp().addToDrawBuffer(object);
         }
     }
 
@@ -141,9 +141,10 @@ public class Compound extends GraphicsObject {
      *
      * @param object Das Grafikobjekt, das hinzugefügt werden soll
      */
-    public void addRelative(GraphicsObject object) {
+    public <T extends GraphicsObject> T addRelative(T object) {
         this.add(object);
         object.setPosition(this.getXPos() + object.getXPos(), this.getYPos() + object.getYPos());
+        return object;
     }
 
     /**

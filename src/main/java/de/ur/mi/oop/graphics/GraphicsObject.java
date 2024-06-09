@@ -130,6 +130,10 @@ public abstract class GraphicsObject {
         setYPos(yPos);
     }
 
+    public void setPosition(Point p) {
+        this.setPosition(p.getXPos(), p.getYPos());
+    }
+
     /**
      * Liefert die Breite des Objekts.
      *
@@ -332,5 +336,9 @@ public abstract class GraphicsObject {
 
     public void setVisible(boolean visible) {
         this.visible = visible;
+    }
+
+    public Point getPosition() {
+        return new Point(getXPos(), getYPos());
     }
 }
