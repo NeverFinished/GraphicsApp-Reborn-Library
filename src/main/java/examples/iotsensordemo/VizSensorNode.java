@@ -12,15 +12,16 @@ import java.util.Set;
 
 class VizSensorNode {
 
+    public static final int ARC_EXTRA_RADIUS = 6;
+
     final NodeViz app;
     char key;
     Arc arc;
     Circle node;
     Label label;
-    Rectangle left, right;
+    Rectangle top, left, right;
     Compound main;
     int fcOffset;
-    long lastParsed;
     Set<VizSensorNode> dynNeighbor = new LinkedHashSet<>();
     Point2D.Float moveVec;
     NodeDataParser.NodeData latest;
@@ -69,14 +70,13 @@ class VizSensorNode {
         fcOffset = 16 * (key - 'A') + (int) (Math.random() * NodeViz.MAX_COMM_DST); // add "average" distance
         float[] pxpy = resetPos();
         main = new Compound(pxpy[0], pxpy[1]);
-        arc = main.addRelative(new Arc(0, 0, 21 + 8, 90, 120, Colors.ORANGE, false));
-
+        arc = main.addRelative(new Arc(0, 0, 21 + ARC_EXTRA_RADIUS, 90, 120, Colors.ORANGE, false));
+        top = main.addRelative(new Rectangle(-12, -36, 24, 36, Colors.getRandomColor()));
         right = main.addRelative(new Rectangle(0, -16, 36, 32, Colors.getRandomColor()));
         left = main.addRelative(new Rectangle(-36, -16, 36, 32, Colors.getRandomColor()));
-
+        top.setVisible(false);
         right.setVisible(false);
         left.setVisible(false);
-
         node = main.addRelative(new Circle(0, 0, 21, color != null ? color : Colors.LIGHT_GREY));
         label = main.addRelative(new Label(-8, 8, "" + key));
         return main;
@@ -131,7 +131,7 @@ class VizSensorNode {
     }
 
     private void checkTopAndBarBounce() {
-        if (main.getYPos()-node.getRadius() <= 0) { // top bounce, rarely happens TODO test
+        if (main.getYPos()-node.getRadius() <= 0) { // top bounce, rarely happens
             moveVec.y *= -1;
             while (main.getYPos()-node.getRadius() <= 0) {
                 main.setYPos(main.getYPos()+1);
@@ -168,7 +168,7 @@ class VizSensorNode {
     }
 
     boolean isActive() {
-        return System.currentTimeMillis() - lastParsed < 500;
+        return latest != null && System.currentTimeMillis() - latest.timeStamp < 500;
     }
 
     private double[] barIntersect() {
@@ -195,15 +195,13 @@ class VizSensorNode {
                 label.setText("" + key);
             }
             node.setRadius(latest.temp);
-            arc.setRadius(latest.temp + 8);
+            arc.setRadius(latest.temp + ARC_EXTRA_RADIUS);
+            top.setVisible(latest.touchLogo > 0);
             left.setVisible(latest.buttonA > 0);
             right.setVisible(latest.buttonB > 0);
             arc.setEnd(latest.rssiScaled());
             arc.setVisible(isActive());
-
-            //xyVec.setEndPoint(dx, dy);
         }
-        lastParsed = System.currentTimeMillis();
     }
 
     public void validateConnections() {

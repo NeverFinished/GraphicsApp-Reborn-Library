@@ -45,6 +45,8 @@ public class NodeDataParser {
             this.rssi = rssi;
         }
 
+        long timeStamp = System.currentTimeMillis();
+
         // direct values
         int accX, accY, accZ;
         int temp;
@@ -77,8 +79,8 @@ public class NodeDataParser {
 
         public Point2D.Float maybeApply(Point2D.Float moveVec) {
             if (anyButtonPressed() || moveVec == null) {
-                float dx = (float) (-1 * roll / 10);
-                float dy = (float) (pitch / 10);
+                float dx = (float) (-1 * roll / 8);
+                float dy = (float) (pitch / 8);
                 return new Point2D.Float(dx, dy);
             }
             return moveVec;
