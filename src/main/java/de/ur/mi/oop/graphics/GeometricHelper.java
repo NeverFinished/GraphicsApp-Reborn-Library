@@ -1,5 +1,7 @@
 package de.ur.mi.oop.graphics;
 
+import java.awt.geom.Point2D;
+
 public class GeometricHelper {
 
     public static double[] findLineCircleIntersections(double cx, double cy, double r, double m, double b) {
@@ -90,6 +92,18 @@ public class GeometricHelper {
 
         double[] scaledCartesian = scalePolarAndConvertToCartesian(polar[0], polar[1], scaleFactor);
         System.out.println("Scaled Cartesian Coordinates: x' = " + scaledCartesian[0] + ", y' = " + scaledCartesian[1]);
+    }
+
+    public static Point2D.Double scaleVector(double x, double y, double scaleFactor) {
+        double[] pc = GeometricHelper.cartesianToPolar(x, y);
+        double[] scaled = GeometricHelper.scalePolarAndConvertToCartesian(pc[0], pc[1], scaleFactor);
+        return new Point2D.Double(scaled[0], scaled[1]);
+    }
+
+    public static Point2D.Double scaleVector(double x, double y, double rOffset, double scaleFactor) {
+        double[] pc = GeometricHelper.cartesianToPolar(x, y);
+        double[] scaled = GeometricHelper.scalePolarAndConvertToCartesian(pc[0], pc[1], rOffset, scaleFactor);
+        return new Point2D.Double(scaled[0], scaled[1]);
     }
 
     public static double[] cartesianToPolar(double x, double y) {

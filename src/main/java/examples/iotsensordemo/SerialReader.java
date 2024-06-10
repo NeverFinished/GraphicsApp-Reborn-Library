@@ -9,11 +9,11 @@ import java.util.function.Consumer;
 
 import com.fazecast.jSerialComm.SerialPort;
 
-public class Serial {
+public class SerialReader {
 
-    private boolean debug;
+    private final boolean debug;
 
-    public Serial(boolean debug) {
+    public SerialReader(boolean debug) {
         this.debug = debug;
     }
 

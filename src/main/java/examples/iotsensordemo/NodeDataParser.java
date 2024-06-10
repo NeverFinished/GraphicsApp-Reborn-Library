@@ -1,5 +1,7 @@
 package examples.iotsensordemo;
 
+import java.awt.geom.Point2D;
+
 public class NodeDataParser {
 
     static NodeData parse(String sensorLine) {
@@ -18,7 +20,7 @@ public class NodeDataParser {
             int touchLogo = Integer.parseInt(tokens[7]);
             int rssi = -17;
             if (tokens.length > 8) {
-                Integer.parseInt(tokens[8]);
+                rssi = Integer.parseInt(tokens[8]);
             }
 
             var nd = new NodeData(accX, accY, accZ, temp, buttonA, buttonB, touchLogo, rssi);
@@ -71,6 +73,15 @@ public class NodeDataParser {
         // rssi is in range -70 to -30. more is better
         public float rssiScaled() {
             return (rssi+70)*5+90;
+        }
+
+        public Point2D.Float maybeApply(Point2D.Float moveVec) {
+            if (anyButtonPressed() || moveVec == null) {
+                float dx = (float) (-1 * roll / 10);
+                float dy = (float) (pitch / 10);
+                return new Point2D.Float(dx, dy);
+            }
+            return moveVec;
         }
     }
 

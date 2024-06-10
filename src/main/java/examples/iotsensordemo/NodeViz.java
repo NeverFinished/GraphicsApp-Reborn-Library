@@ -32,6 +32,11 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
     char activeKey = 0;
 
     Map<Character, VizSensorNode> nodes = new LinkedHashMap<>(); // TODO color mapping
+    // RED 247, 134, 126
+    // BLUE LIGHT
+    // BLUE DARK
+    // YELLOW
+    // ORANGE
     Collection<NodePair> lines = new ArrayList<>();
     Rectangle bar;
 
@@ -66,12 +71,12 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
         buildStandardNodeConnections();
 
         //StdIn.pass(s -> parseLine(s));
-        //new Serial(false).connect(this::parseLine);
+        new SerialReader(false).connect(this::parseLine);
     }
 
     private void buildStandardNodeConnections() {
         var lines = new LinkedHashSet<NodePair>();
-        for (int x1 = 0; x1 < 5; x1++) { // TODO instead of static - keep connection to the closest three nodes
+        for (int x1 = 0; x1 < 5; x1++) {
             for (int y1 = 0; y1 < 5; y1++) {
                 char c1 = (char) ('A' + (y1 * 5) + x1);
                 char c2 = (char) ('A' + (y1 * 5) + Math.min(4, x1 + 1)); // right
@@ -140,22 +145,30 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
                 lines.forEach(n -> drawFixedConnection(g2d, n));
             }
         } else { // show moving vectors (from accel)
-            Stroke stroke = new BasicStroke(2);
-            g2d.setStroke(stroke);
-            g2d.setColor(Colors.CYAN.asAWTColor().darker());
-            for (VizSensorNode vsn : nodes.values()) {
-                float x1 = vsn.main.getXPos();
-                float y1 = vsn.main.getYPos();
-                float x2 = x1 + vsn.dx;
-                float y2 = y1 + vsn.dy;
-                double[] pc = GeometricHelper.cartesianToPolar(x2 - x1, y2 - y1);
-                double[] scaled = GeometricHelper.scalePolarAndConvertToCartesian(pc[0], pc[1], vsn.node.getRadius(), 10);
-                x2 = (float) (x1 + scaled[0]);
-                y2 = (float) (y1 + scaled[1]);
-                g2d.drawLine((int) x1, (int) y1, (int) x2, (int) y2);
-                Shape arrowHead = Arrow.createArrowShape(new Point2D.Double(x1, y1), new Point2D.Double(x2, y2));
-                g2d.fill(arrowHead);
+            drawMovingOrAccelVector(g2d);
+        }
+    }
+
+    private void drawMovingOrAccelVector(Graphics2D g2d) {
+        Stroke stroke = new BasicStroke(2);
+        g2d.setStroke(stroke);
+        g2d.setColor(Colors.CYAN.asAWTColor().darker());
+        for (VizSensorNode vsn : nodes.values()) {
+            float x1 = vsn.main.getXPos();
+            float y1 = vsn.main.getYPos();
+            float x2 = x1 + vsn.moveVec.x;
+            float y2 = y1 + vsn.moveVec.y;
+            if (vsn.latest != null && vsn.isActive()) {
+                Point2D.Float vec = vsn.latest.maybeApply(null);
+                x2 = x1 + vec.x;
+                y2 = y1 + vec.y;
             }
+            Point2D.Double vec = GeometricHelper.scaleVector(x2 - x1, y2 - y1, vsn.node.getRadius(), 10);
+            x2 = (float) (x1 + vec.x);
+            y2 = (float) (y1 + vec.y);
+            g2d.drawLine((int) x1, (int) y1, (int) x2, (int) y2);
+            Shape arrowHead = Arrow.createArrowShape(new Point2D.Double(x1, y1), new Point2D.Double(x2, y2));
+            g2d.fill(arrowHead);
         }
     }
 
@@ -164,16 +177,12 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
             drawConnection(g2d, n.main.getXPos(), n.main.getYPos(),
                     o.main.getXPos(), o.main.getYPos(), n.fcOffset + o.fcOffset);
         }
-
     }
 
     private void drawFixedConnection(Graphics2D g2d, NodePair np) {
         g2d.setColor(Colors.GREEN.asAWTColor().darker());
-        float x1 = np.l.main.getXPos();
-        float y1 = np.l.main.getYPos();
-        float x2 = np.r.main.getXPos();
-        float y2 = np.r.main.getYPos();
-        drawConnection(g2d, x1, y1, x2, y2, np.l.fcOffset + np.r.fcOffset);
+        boolean debug =  (np.l.key == 'G' && np.r.key == 'F') || (np.l.key == 'F' && np.r.key == 'G');
+        drawConnection(g2d, np.l.main.getXPos(), np.l.main.getYPos(), np.r.main.getXPos(), np.r.main.getYPos(), np.l.fcOffset + np.r.fcOffset);
     }
 
     private void drawConnection(Graphics2D g2d, float x1, float y1, float x2, float y2, long fcOffset) {
@@ -181,13 +190,12 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
         g2d.setColor(Colors.GREEN.asAWTColor());
         try {
             double dst = Point2D.distance(x1, y1, x2, y2);
-            long tmp = getFrameCounter() + fcOffset;
-            double scale = tmp % (2L * dst);
+            long tmp = getFrameCounter() + (fcOffset/10);
+            double scale = tmp % fcOffset;
+            System.out.println(fcOffset);
             if (scale > 0 && scale < dst) {
-                // TODO something still jitters, sometimes doubled
-                double[] pc = GeometricHelper.cartesianToPolar(x2 - x1, y2 - y1);
-                double[] scaled = GeometricHelper.scalePolarAndConvertToCartesian(pc[0], pc[1], scale / dst);
-                g2d.fillOval((int) (x1 + scaled[0]) - 2, (int) (y1 + scaled[1]) - 2, 5, 5);
+                Point2D.Double vec = GeometricHelper.scaleVector(x2 - x1, y2 - y1, scale / dst);
+                g2d.fillOval((int) (x1 + vec.x) - 2, (int) (y1 + vec.y) - 2, 5, 5);
             }
         } catch (ArithmeticException e) {
             System.err.println(e.getMessage());

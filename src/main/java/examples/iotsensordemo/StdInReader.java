@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.function.Consumer;
 
-public class StdIn {
+public class StdInReader {
     public static void pass(Consumer<String> c) {
         new Thread(() -> {
             try {

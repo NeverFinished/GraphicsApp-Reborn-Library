@@ -13,7 +13,6 @@ class VizSensorNode {
 
     final NodeViz app;
     char key;
-    float dx, dy;
     Arc arc;
     Circle node;
     Label label;
@@ -22,6 +21,8 @@ class VizSensorNode {
     int fcOffset;
     long lastParsed;
     Set<VizSensorNode> dynNeighbor = new LinkedHashSet<>();
+    Point2D.Float moveVec;
+    NodeDataParser.NodeData latest;
 
     @Override
     public boolean equals(Object o) {
@@ -48,12 +49,11 @@ class VizSensorNode {
     void jitter() {
         float newDx = (float) (Math.random() * .1) * (Math.random() > 0.5 ? 1 : -1);
         float newDy = (float) (Math.random() * .1) * (Math.random() > 0.5 ? 1 : -1);
-        if (dx > 0.1 || dy > 0.1) { // moving
-            dx = ((NodeViz.LP_FACTOR - 1) * dx + newDx) / NodeViz.LP_FACTOR;
-            dy = ((NodeViz.LP_FACTOR - 1) * dy + newDy) / NodeViz.LP_FACTOR;
+        if (moveVec.x > 0.1 || moveVec.y > 0.1) { // moving
+            moveVec.x = ((NodeViz.LP_FACTOR - 1) * moveVec.x + newDx) / NodeViz.LP_FACTOR;
+            moveVec.y = ((NodeViz.LP_FACTOR - 1) * moveVec.y + newDy) / NodeViz.LP_FACTOR;
         } else {
-            dx = newDx;
-            dy = newDy;
+            moveVec = new Point2D.Float(newDx, newDy);
         }
     }
 
@@ -63,8 +63,7 @@ class VizSensorNode {
     }
 
     Compound init() {
-        fcOffset = (int) (Math.random() * key * key); // spread...
-        fcOffset += (int) (Math.random() * NodeViz.MAX_COMM_DST); // add "average" distance
+        fcOffset = 16 * (key - 'A') + (int) (Math.random() * NodeViz.MAX_COMM_DST); // add "average" distance
         float[] pxpy = resetPos();
         main = new Compound(pxpy[0], pxpy[1]);
         arc = main.addRelative(new Arc(0, 0, 21 + 8, 90, 120, Colors.ORANGE, false));
@@ -87,25 +86,24 @@ class VizSensorNode {
         float px = (0.5f + gridX) * NodeViz.width / 5f;
         px += (float) (Math.random() * 20f) * (Math.random() > 0.5 ? 1 : -1);
         float py = (0.5f + gridY) * NodeViz.height / 6f; // leave a empty row at bottom
-        dx = 0; // also reset any movement
-        dy = 0;
+        moveVec = new Point2D.Float(); // also reset any movement
         return new float[]{px, py};
     }
 
     void anim() {
         if (app.gravity) {
-            dx = ((NodeViz.LP_FACTOR - 1) * dx) / NodeViz.LP_FACTOR;
+            moveVec.x = ((NodeViz.LP_FACTOR - 1) * moveVec.x) / NodeViz.LP_FACTOR;
             if (barIntersect(-1).length == 0) { // TODO silent stopping buggy - okay for now
-                dy += 0.1; // apply gravity
+                moveVec.y += 0.1; // apply gravity
                 // TODO einfallswinkel = ausfallswinkel
             } else { // "abrutschen"
-                dx = (float) (app.bar.getRotation() / 10);
+                moveVec.x = (float) (app.bar.getRotation() / 10);
             }
         } else if (app.getFrameCounter() % 16 == key - 'A') {
             jitter();
         }
         
-        main.move(dx, dy);
+        main.move(moveVec.x, moveVec.y);
         label.setVisible(app.labelMode != LabelMode.NONE);
         app.bar.setVisible(app.gravity);
 
@@ -119,7 +117,7 @@ class VizSensorNode {
 
     private void checkTopAndBottomBounce() {
         if (main.getYPos() >= NodeViz.height || main.getYPos() <= 0) {
-            dy *= -1;
+            moveVec.y *= -1;
             while (main.getYPos() >= NodeViz.height) {
                 main.setYPos(main.getYPos() - 4);
             }
@@ -131,7 +129,7 @@ class VizSensorNode {
 
     private void checkTopAndBarBounce() {
         if (main.getYPos()-node.getRadius() <= 0) { // top bounce, rarely happens TODO test
-            dy *= -1;
+            moveVec.y *= -1;
             while (main.getYPos()-node.getRadius() <= 0) {
                 main.setYPos(main.getYPos()+1);
             }
@@ -142,10 +140,10 @@ class VizSensorNode {
 
     private void checkForBarBounce() {
         if (barIntersect().length > 0) {
-            dy *= -0.75;
+            moveVec.y *= -0.75;
             double rel = (2.0 * main.getXPos() / NodeViz.width) - 1.0;
             if (isActive()) { // only for nodes that are in the network
-                app.bar.rotate(Math.min(1, Math.abs(dy)) * rel / 10);
+                app.bar.rotate(Math.min(1, Math.abs(moveVec.y)) * rel / 10);
             }
             while (barIntersect().length > 1) {
                 main.setYPos(main.getYPos() - 1);
@@ -155,7 +153,7 @@ class VizSensorNode {
 
     private void sideBounce() {
         if (main.getXPos() + node.getRadius() > NodeViz.width || main.getXPos() - node.getRadius() <= 0) {
-            dx *= -1;
+            moveVec.x *= -1;
             while (main.getXPos() + node.getRadius() > NodeViz.width) {
                 main.move(-1, 0);
             }
@@ -165,7 +163,7 @@ class VizSensorNode {
         }
     }
 
-    private boolean isActive() {
+    boolean isActive() {
         return System.currentTimeMillis() - lastParsed < 500;
     }
 
@@ -183,24 +181,20 @@ class VizSensorNode {
     // A -8 564 -892 29 0 0 0 -33
     // A -48 480 932 33 0 0 0
     public void parse(String sensorLine) {
-
-        var nd = NodeDataParser.parse(sensorLine);
-        if (nd != null) {
-            if (nd.anyButtonPressed()) {
-                dx = (float) (-1 * nd.roll / 10);
-                dy = (float) (nd.pitch / 10);
-            }
+        latest = NodeDataParser.parse(sensorLine);
+        if (latest != null) {
+            moveVec = latest.maybeApply(moveVec);
 
             if (app.labelMode == LabelMode.LINE) {
-                label.setText(sensorLine + String.format(" %.2f %.2f", nd.pitch, nd.roll));
+                label.setText(sensorLine + String.format(" %.2f %.2f", latest.pitch, latest.roll));
             } else {
                 label.setText("" + key);
             }
-            node.setRadius(nd.temp);
-            arc.setRadius(nd.temp + 8);
-            left.setVisible(nd.buttonA > 0);
-            right.setVisible(nd.buttonB > 0);
-            arc.setEnd(nd.rssiScaled());
+            node.setRadius(latest.temp);
+            arc.setRadius(latest.temp + 8);
+            left.setVisible(latest.buttonA > 0);
+            right.setVisible(latest.buttonB > 0);
+            arc.setEnd(latest.rssiScaled());
             arc.setVisible(isActive());
 
             //xyVec.setEndPoint(dx, dy);
