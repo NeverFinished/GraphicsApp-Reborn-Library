@@ -1,6 +1,7 @@
 package examples.iotsensordemo;
 
 import de.ur.mi.oop.app.SimpleGraphicsApp;
+import de.ur.mi.oop.colors.Color;
 import de.ur.mi.oop.colors.Colors;
 import de.ur.mi.oop.events.KeyPressedEvent;
 import de.ur.mi.oop.events.MouseDraggedEvent;
@@ -27,18 +28,28 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
     public static int width = 1200;
     public static int height = 800;
 
+    public static final de.ur.mi.oop.colors.Color RED_MB = new de.ur.mi.oop.colors.Color(247, 115, 74);
+    public static final de.ur.mi.oop.colors.Color YELLOW_MB = new de.ur.mi.oop.colors.Color(250, 245, 97);
+    public static final de.ur.mi.oop.colors.Color ORANGE_MB = new de.ur.mi.oop.colors.Color(250, 150, 35);
+    public static final de.ur.mi.oop.colors.Color BLUE_LIGHT_MB = new de.ur.mi.oop.colors.Color(121, 247, 237);
+    public static final de.ur.mi.oop.colors.Color BLUE_DARK_MB = new de.ur.mi.oop.colors.Color(80, 190, 250);
+
     boolean gravity, dynamicConnections, showLines = true, showRSSI = true;
     LabelMode labelMode = LabelMode.LINE;
     char activeKey = 0;
 
-    Map<Character, VizSensorNode> nodes = new LinkedHashMap<>(); // TODO color mapping
-    // RED 247, 134, 126
-    // BLUE LIGHT
-    // BLUE DARK
-    // YELLOW
-    // ORANGE
+    Map<Character, VizSensorNode> nodes = new LinkedHashMap<>();
+    Map<Character, Color> colors = new LinkedHashMap<>();
     Collection<NodePair> lines = new ArrayList<>();
     Rectangle bar;
+
+    {
+        colors.put('B', RED_MB);
+        colors.put('C', YELLOW_MB);
+        colors.put('D', ORANGE_MB);
+        colors.put('E', BLUE_DARK_MB);
+        colors.put('F', BLUE_LIGHT_MB);
+    }
 
     record NodePair(VizSensorNode l, VizSensorNode r) {
     }
@@ -53,7 +64,7 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
         height = bounds.height - 64;
         setBackgroundColor(Colors.BLACK);
         for (char c = 'A'; c <= MAX_CHAR; c++) {
-            VizSensorNode vsn = new VizSensorNode(this, c);
+            VizSensorNode vsn = new VizSensorNode(this, c, colors.get(c));
             add(vsn.init());
             nodes.put(c, vsn);
         }
@@ -81,19 +92,19 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
                 char c1 = (char) ('A' + (y1 * 5) + x1);
                 char c2 = (char) ('A' + (y1 * 5) + Math.min(4, x1 + 1)); // right
                 if (nodes.containsKey(c2) && c1 != c2) {
-                    lines.add(new NodePair(nodes.get(c1), nodes.get(c2)));
+                    lines.add(new NodePair(nodes.get(c1 < c2 ? c1 : c2), nodes.get(c1 < c2 ? c2 : c1)));
                 }
                 c2 = (char) ('A' + ((y1 + 1) * 5) + Math.min(4, x1 + 1)); // right-down
                 if (nodes.containsKey(c2) && c1 != c2) {
-                    lines.add(new NodePair(nodes.get(c1), nodes.get(c2)));
+                    lines.add(new NodePair(nodes.get(c1 < c2 ? c1 : c2), nodes.get(c1 < c2 ? c2 : c1)));
                 }
                 c2 = (char) ('A' + (Math.min(4, (y1 + 1)) * 5) + x1); // down
                 if (nodes.containsKey(c2) && c1 != c2) {
-                    lines.add(new NodePair(nodes.get(c1), nodes.get(c2)));
+                    lines.add(new NodePair(nodes.get(c1 < c2 ? c1 : c2), nodes.get(c1 < c2 ? c2 : c1)));
                 }
                 c2 = (char) ('A' + Math.max(0, Math.min(4, ((y1 - 1)))) * 5 + Math.min(4, x1 + 1)); // right-up
                 if (nodes.containsKey(c2) && c1 != c2) {
-                    lines.add(new NodePair(nodes.get(c1), nodes.get(c2)));
+                    lines.add(new NodePair(nodes.get(c1 < c2 ? c1 : c2), nodes.get(c1 < c2 ? c2 : c1)));
                 }
             }
         }
@@ -192,7 +203,6 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
             double dst = Point2D.distance(x1, y1, x2, y2);
             long tmp = getFrameCounter() + (fcOffset/10);
             double scale = tmp % fcOffset;
-            System.out.println(fcOffset);
             if (scale > 0 && scale < dst) {
                 Point2D.Double vec = GeometricHelper.scaleVector(x2 - x1, y2 - y1, scale / dst);
                 g2d.fillOval((int) (x1 + vec.x) - 2, (int) (y1 + vec.y) - 2, 5, 5);

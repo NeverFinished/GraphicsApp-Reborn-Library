@@ -1,5 +1,6 @@
 package examples.iotsensordemo;
 
+import de.ur.mi.oop.colors.Color;
 import de.ur.mi.oop.colors.Colors;
 import de.ur.mi.oop.graphics.*;
 
@@ -23,6 +24,7 @@ class VizSensorNode {
     Set<VizSensorNode> dynNeighbor = new LinkedHashSet<>();
     Point2D.Float moveVec;
     NodeDataParser.NodeData latest;
+    Color color;
 
     @Override
     public boolean equals(Object o) {
@@ -57,9 +59,10 @@ class VizSensorNode {
         }
     }
 
-    public VizSensorNode(NodeViz app, char key) {
+    public VizSensorNode(NodeViz app, char key, Color color) {
         this.app = app;
         this.key = key;
+        this.color = color;
     }
 
     Compound init() {
@@ -74,7 +77,7 @@ class VizSensorNode {
         right.setVisible(false);
         left.setVisible(false);
 
-        node = main.addRelative(new Circle(0, 0, 21, Colors.LIGHT_GREY));
+        node = main.addRelative(new Circle(0, 0, 21, color != null ? color : Colors.LIGHT_GREY));
         label = main.addRelative(new Label(-8, 8, "" + key));
         return main;
     }
