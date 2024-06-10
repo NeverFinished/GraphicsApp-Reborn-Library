@@ -62,12 +62,13 @@ public abstract class SimpleGraphicsApp extends GraphicsApp {
         return scene;
     }
 
-    protected static void pause(int delayMs) {
+    protected static boolean pause(int delayMs) {
         try {
             Thread.sleep(delayMs);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
+        return true;
     }
 
     @Override

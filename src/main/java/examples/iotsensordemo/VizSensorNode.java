@@ -16,7 +16,7 @@ class VizSensorNode {
 
     final NodeViz app;
     char key;
-    Arc arc;
+    Arc arc, arc2;
     Circle node;
     Label label;
     Rectangle top, left, right;
@@ -70,7 +70,8 @@ class VizSensorNode {
         fcOffset = 16 * (key - 'A') + (int) (Math.random() * NodeViz.MAX_COMM_DST); // add "average" distance
         float[] pxpy = resetPos();
         main = new Compound(pxpy[0], pxpy[1]);
-        arc = main.addRelative(new Arc(0, 0, 21 + ARC_EXTRA_RADIUS, 90, 120, Colors.ORANGE, false));
+        arc2 = main.addRelative(new Arc(0, 0, 21 + ARC_EXTRA_RADIUS + ARC_EXTRA_RADIUS, 90, 270, Colors.BROWN, false));
+        arc = main.addRelative(new Arc(0, 0, 21 + ARC_EXTRA_RADIUS, 90, 120, Colors.ORANGE.brighter(), false));
         top = main.addRelative(new Rectangle(-12, -36, 24, 36, Colors.getRandomColor()));
         right = main.addRelative(new Rectangle(0, -16, 36, 32, Colors.getRandomColor()));
         left = main.addRelative(new Rectangle(-36, -16, 36, 32, Colors.getRandomColor()));
@@ -195,12 +196,15 @@ class VizSensorNode {
                 label.setText("" + key);
             }
             node.setRadius(latest.temp);
-            arc.setRadius(latest.temp + ARC_EXTRA_RADIUS);
             top.setVisible(latest.touchLogo > 0);
             left.setVisible(latest.buttonA > 0);
             right.setVisible(latest.buttonB > 0);
+            arc.setRadius(latest.temp + ARC_EXTRA_RADIUS);
             arc.setEnd(latest.rssiScaled());
             arc.setVisible(isActive());
+            arc2.setRadius(latest.temp + ARC_EXTRA_RADIUS + ARC_EXTRA_RADIUS);
+            arc2.setEnd(360f * latest.accZ / 1024f);
+            arc2.setVisible(isActive());
         }
     }
 
