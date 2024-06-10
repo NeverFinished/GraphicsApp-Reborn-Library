@@ -110,6 +110,8 @@ class VizSensorNode {
         main.move(moveVec.x, moveVec.y);
         label.setVisible(app.labelMode != LabelMode.NONE);
         app.bar.setVisible(app.gravity);
+        arc.setVisible(isActive());
+        arc2.setVisible(isActive());
 
         sideBounce();
         if (app.gravity) {
@@ -201,10 +203,8 @@ class VizSensorNode {
             right.setVisible(latest.buttonB > 0);
             arc.setRadius(latest.temp + ARC_EXTRA_RADIUS);
             arc.setEnd(latest.rssiScaled());
-            arc.setVisible(isActive());
             arc2.setRadius(latest.temp + ARC_EXTRA_RADIUS + ARC_EXTRA_RADIUS);
             arc2.setEnd(360f * latest.accZ / 1024f);
-            arc2.setVisible(isActive());
         }
     }
 
