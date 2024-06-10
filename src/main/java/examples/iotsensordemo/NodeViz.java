@@ -192,8 +192,8 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
 
     private void drawFixedConnection(Graphics2D g2d, NodePair np) {
         g2d.setColor(Colors.GREEN.asAWTColor().darker());
-        boolean debug =  (np.l.key == 'G' && np.r.key == 'F') || (np.l.key == 'F' && np.r.key == 'G');
-        drawConnection(g2d, np.l.main.getXPos(), np.l.main.getYPos(), np.r.main.getXPos(), np.r.main.getYPos(), np.l.fcOffset + np.r.fcOffset);
+        drawConnection(g2d, np.l.main.getXPos(), np.l.main.getYPos(),
+                np.r.main.getXPos(), np.r.main.getYPos(), np.l.fcOffset + np.r.fcOffset);
     }
 
     private void drawConnection(Graphics2D g2d, float x1, float y1, float x2, float y2, long fcOffset) {
@@ -201,7 +201,7 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
         g2d.setColor(Colors.GREEN.asAWTColor());
         try {
             double dst = Point2D.distance(x1, y1, x2, y2);
-            long tmp = getFrameCounter() + (fcOffset/10);
+            long tmp = getFrameCounter() + (fcOffset / 10);
             double scale = tmp % fcOffset;
             if (scale > 0 && scale < dst) {
                 Point2D.Double vec = GeometricHelper.scaleVector(x2 - x1, y2 - y1, scale / dst);
@@ -224,8 +224,6 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
             labelMode = LabelMode.values()[(labelMode.ordinal() + 1) % LabelMode.values().length];
         } else if (keyChar == 'c') {
             showLines = !showLines;
-        } else if (keyChar == 'g') {
-            gravity = !gravity;
         } else if (keyChar == 'r') {
             showRSSI = !showRSSI;
         } else if (keyChar == 'd') {
@@ -240,6 +238,21 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
                 n.main.move(pxpy[0] - current.getXPos(), pxpy[1] - current.getYPos());
             });
             bar.setRotation(0);
+        } else if (keyChar == ',') {
+            bar.rotate(-2);
+        } else if (keyChar == '.') {
+            bar.rotate(2);
+        } else if (keyChar == '-') {
+            bar.setRotation(0);
+        } else if (keyChar == ' ' || keyChar == 'g') {
+            gravity = !gravity;
+            if (gravity) {
+                for (VizSensorNode vsn : nodes.values()) {
+                    while (vsn.main.getYPos() + vsn.node.getRadius() > bar.getYPos()) {
+                        vsn.main.move(0, -32);
+                    }
+                }
+            }
         }
     }
 
@@ -250,13 +263,6 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
             if (vsn != null) {
                 vsn.main.move(event.getXPos() - vsn.main.getXPos(), event.getYPos() - vsn.main.getYPos());
             }
-        }
-    }
-
-    @Override
-    public void onMousePressed(MousePressedEvent event) {
-        if (event.getYPos() > height - BAR_HEIGHT) {
-            gravity = !gravity;
         }
     }
 

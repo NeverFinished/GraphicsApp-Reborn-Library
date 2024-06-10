@@ -106,26 +106,10 @@ public class GeometricHelper {
         return new Point2D.Double(scaled[0], scaled[1]);
     }
 
-    public static double[] cartesianToPolar(double x, double y) {
+    private static double[] cartesianToPolar(double x, double y) {
         //return cartesianToPolar(x, y, false);
         double r = Math.sqrt(x * x + y * y);
         double theta = Math.atan2(y, x);
-        return new double[]{r, theta};
-    }
-
-    public static double[] cartesianToPolar(double x, double y, boolean print) {
-        double r = Math.sqrt(x * x + y * y);
-        double theta = Math.atan2(y, x);
-        /* double other = Math.atan2(x, y); TODO still something wrong here...
-        double theta2 = theta;
-        if (y > 0) {
-             theta2 = Math.PI/2.0 - other;
-        }
-        if (y < 0) {
-            theta2 = -Math.PI/2.0 - other;
-        }
-        if (theta2 < -Math.PI) theta2 += Math.PI;
-        if (print) System.out.println("" + theta + " " + theta2); */
         return new double[]{r, theta};
     }
 

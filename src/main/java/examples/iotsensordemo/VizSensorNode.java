@@ -144,9 +144,10 @@ class VizSensorNode {
     private void checkForBarBounce() {
         if (barIntersect().length > 0) {
             moveVec.y *= -0.75;
-            double rel = (2.0 * main.getXPos() / NodeViz.width) - 1.0;
+            double rel = (2.0 * main.getXPos() / NodeViz.width) - 1.0; // x position normed to [-1,1]
             if (isActive()) { // only for nodes that are in the network
-                app.bar.rotate(Math.min(1, Math.abs(moveVec.y)) * rel / 10);
+                // at least apply 'force' of 1 downwards, but for a stronger momentum the vertical component (y)clc
+                app.bar.rotate(Math.min(1, Math.abs(moveVec.y)) * rel / 10); // TODO 10 okay for more active nodes?
             }
             while (barIntersect().length > 1) {
                 main.setYPos(main.getYPos() - 1);
