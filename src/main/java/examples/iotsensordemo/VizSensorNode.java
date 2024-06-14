@@ -150,7 +150,7 @@ class VizSensorNode {
             double rel = (2.0 * main.getXPos() / NodeViz.width) - 1.0; // x position normed to [-1,1]
             if (isActive()) { // only for nodes that are in the network
                 // at least apply 'force' of 1 downwards, but for a stronger momentum the vertical component (y)clc
-                app.bar.rotate(Math.min(1, Math.abs(moveVec.y)) * rel / 10); // TODO 10 okay for more active nodes?
+                app.bar.rotate(Math.max(1, Math.min(8, Math.abs(moveVec.y))) * rel / 10); // TODO 8 okay for more active nodes?
             }
             while (barIntersect().length > 1) {
                 main.setYPos(main.getYPos() - 1);
@@ -202,9 +202,9 @@ class VizSensorNode {
             left.setVisible(latest.buttonA > 0);
             right.setVisible(latest.buttonB > 0);
             arc.setRadius(latest.temp + ARC_EXTRA_RADIUS);
-            arc.setEnd(latest.rssiScaled());
+            arc.setEnd(360f * latest.accZ / 1024f);
             arc2.setRadius(latest.temp + ARC_EXTRA_RADIUS + ARC_EXTRA_RADIUS);
-            arc2.setEnd(360f * latest.accZ / 1024f);
+            arc2.setEnd(latest.rssiScaled());
         }
     }
 

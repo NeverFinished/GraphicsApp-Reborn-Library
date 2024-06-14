@@ -36,7 +36,7 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
     public static final de.ur.mi.oop.colors.Color BLUE_DARK_MB = new de.ur.mi.oop.colors.Color(80, 190, 250);
 
     boolean gravity, dynamicConnections, showLines = true, showRSSI = true;
-    LabelMode labelMode = LabelMode.LINE;
+    LabelMode labelMode = LabelMode.KEY;
     char activeKey = 0;
 
     Map<Character, VizSensorNode> nodes = new LinkedHashMap<>();

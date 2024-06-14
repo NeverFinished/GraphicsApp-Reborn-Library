@@ -6,6 +6,10 @@ public class NodeDataParser {
 
     static NodeData parse(String sensorLine) {
         String[] tokens = sensorLine.split(" ");
+        if (tokens.length > 9) {
+            System.err.println("OLD version, cannot parse: " + sensorLine);
+            return null;
+        }
         if (tokens.length < 8) { // with GW its 9, 8 otherwise
             System.err.println("cannot parse: " + sensorLine);
             return null;
