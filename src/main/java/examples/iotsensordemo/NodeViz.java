@@ -11,6 +11,7 @@ import de.ur.mi.oop.graphics.Rectangle;
 import de.ur.mi.oop.launcher.GraphicsAppLauncher;
 
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.util.*;
 
@@ -19,6 +20,7 @@ enum LabelMode {NONE, KEY, LINE}
 public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
 
     public static final int ANIM_DELAY = 20;
+    public static final int ARROW_BASE_SIZE = 40;
     public static final int BAR_HEIGHT = 180;
     public static final char MAX_CHAR = 'Y';
     public static final int LP_FACTOR = 4;
@@ -35,9 +37,11 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
     public static final de.ur.mi.oop.colors.Color BLUE_LIGHT_MB = new de.ur.mi.oop.colors.Color(121, 247, 237);
     public static final de.ur.mi.oop.colors.Color BLUE_DARK_MB = new de.ur.mi.oop.colors.Color(80, 190, 250);
 
-    boolean gravity, dynamicConnections, showLines = true, showRSSI = true;
+    boolean gravity = true, dynamicConnections, showLines = true, showRSSI = true;
     LabelMode labelMode = LabelMode.KEY;
     char activeKey = 0;
+    enum Direction { LEFT, STOP, RIGHT }
+    Direction animDir = Direction.STOP;
 
     Map<Character, VizSensorNode> nodes = new LinkedHashMap<>();
     Map<Character, Color> colors = new LinkedHashMap<>();
@@ -64,11 +68,7 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
         width = bounds.width;
         height = bounds.height - 64;
         setBackgroundColor(Colors.BLACK);
-        for (char c = 'A'; c <= MAX_CHAR; c++) {
-            VizSensorNode vsn = new VizSensorNode(this, c, colors.get(c));
-            add(vsn.init());
-            nodes.put(c, vsn);
-        }
+        // TODO enable createNodes();
         bar = add(new Rectangle(-50, height - BAR_HEIGHT, width + 100, BAR_HEIGHT, Colors.BLACK.brighter().brighter()) {
             @Override
             public void rotate(double degrees) {
@@ -78,12 +78,22 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
                 }
             }
         });
+        add(new BarBoundCircle(40, Colors.BLACK.brighter()));
+        add(new BarBoundCircle(25, Colors.BLACK));
         setDrawAdapter(this);
 
         buildStandardNodeConnections();
 
         //StdIn.pass(s -> parseLine(s));
-        new SerialReader(false).connect(this::parseLine);
+        //new SerialReader(false).connect(this::parseLine);
+    }
+
+    private void createNodes() {
+        for (char c = 'A'; c <= MAX_CHAR; c++) {
+            VizSensorNode vsn = new VizSensorNode(this, c, colors.get(c));
+            add(vsn.init());
+            nodes.put(c, vsn);
+        }
     }
 
     private void buildStandardNodeConnections() {
@@ -157,6 +167,25 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
         } else { // show moving vectors (from accel)
             drawMovingOrAccelVector(g2d);
         }
+        drawAnimBar(g2d);
+    }
+
+    private void drawAnimBar(Graphics2D g2d) {
+        if (animDir == Direction.STOP || !bar.isVisible()) {
+            return;
+        }
+        var stroke = new BasicStroke(2);
+        AffineTransform at = g2d.getTransform();
+        g2d.rotate(Math.toRadians(bar.getRotation()), bar.getXPos() + bar.getWidth() / 2.0, bar.getYPos() + bar.getHeight() / 2.0);
+        g2d.setStroke(stroke);
+        g2d.setColor(Colors.YELLOW.asAWTColor().darker());
+        int di = animDir.ordinal()-1;
+        int gap = (int) (2.0 * width / ARROW_BASE_SIZE);
+        for (int offset = 0; offset < width; offset+=gap) {
+            g2d.fill(DoubleShearedRect.createShape(new Point2D.Double((width + offset + di*getFrameCounter()) % width, height-BAR_HEIGHT+15),
+                    ARROW_BASE_SIZE, ARROW_BASE_SIZE-10, di*10));
+        }
+        g2d.setTransform(at);
     }
 
     private void drawMovingOrAccelVector(Graphics2D g2d) {
@@ -247,6 +276,8 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
                     }
                 }
             }
+        } else if (keyChar == '1' || keyChar == '2' || keyChar == '3') {
+            animDir = Direction.values()[Integer.parseInt(""+keyChar)-1];
         }
     }
 
@@ -262,5 +293,16 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
 
     public static void main(String[] args) {
         GraphicsAppLauncher.launch();
+    }
+
+    private class BarBoundCircle extends Circle {
+        public BarBoundCircle(float radius, Color c) {
+            super(NodeViz.width / 2f, NodeViz.height - (NodeViz.BAR_HEIGHT / 2f), radius, c);
+        }
+
+        @Override
+        public boolean isVisible() {
+            return bar.isVisible();
+        }
     }
 }
