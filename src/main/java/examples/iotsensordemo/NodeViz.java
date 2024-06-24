@@ -6,6 +6,7 @@ import de.ur.mi.oop.colors.Colors;
 import de.ur.mi.oop.events.KeyPressedEvent;
 import de.ur.mi.oop.events.MouseDraggedEvent;
 import de.ur.mi.oop.graphics.*;
+import de.ur.mi.oop.graphics.Label;
 import de.ur.mi.oop.graphics.Point;
 import de.ur.mi.oop.graphics.Rectangle;
 import de.ur.mi.oop.launcher.GraphicsAppLauncher;
@@ -37,7 +38,7 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
     public static final de.ur.mi.oop.colors.Color BLUE_LIGHT_MB = new de.ur.mi.oop.colors.Color(121, 247, 237);
     public static final de.ur.mi.oop.colors.Color BLUE_DARK_MB = new de.ur.mi.oop.colors.Color(80, 190, 250);
 
-    boolean gravity = true, dynamicConnections, showLines = true, showRSSI = true;
+    boolean gravity = false, limitForceToActive = true, dynamicConnections, showLines = true, showRSSI = true;
     LabelMode labelMode = LabelMode.KEY;
     char activeKey = 0;
     enum Direction { LEFT, STOP, RIGHT }
@@ -47,8 +48,9 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
     Map<Character, Color> colors = new LinkedHashMap<>();
     Collection<NodePair> lines = new ArrayList<>();
     Rectangle bar;
+    Label debugLabel; // TODO add render here
 
-    {
+    { // TODO more!
         colors.put('B', RED_MB);
         colors.put('C', YELLOW_MB);
         colors.put('D', ORANGE_MB);
@@ -63,12 +65,13 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
     public void initialize() {
         java.awt.Rectangle bounds = getAppManager().getGraphicsContext().getDeviceConfiguration().getBounds();
         //setCanvasSize(WIDTH, HEIGHT);
-        setCanvasSize(bounds.width, bounds.height - 64);
+        setCanvasSize(bounds.width, bounds.height - 64); // TODO try fullscreen
         getAppManager().getAppFrame().setLocation(0, 0);
         width = bounds.width;
         height = bounds.height - 64;
         setBackgroundColor(Colors.BLACK);
-        // TODO enable createNodes();
+        createNodes();
+        debugLabel = add(new Label(15, 25, "fmin=1, fmax=8, fdiv=10, g=0.1", Colors.BLACK.brighter()));
         bar = add(new Rectangle(-50, height - BAR_HEIGHT, width + 100, BAR_HEIGHT, Colors.BLACK.brighter().brighter()) {
             @Override
             public void rotate(double degrees) {
@@ -155,7 +158,7 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
     }
 
     @Override
-    public void draw(Graphics2D g2d) { // comm lines (fade out?)
+    public void drawPreScene(Graphics2D g2d) {
         if (showLines) {
             var stroke = new BasicStroke(1);
             g2d.setStroke(stroke);
@@ -164,7 +167,12 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
             } else {
                 lines.forEach(n -> drawFixedConnection(g2d, n));
             }
-        } else { // show moving vectors (from accel)
+        }
+    }
+
+    @Override
+    public void drawPostScene(Graphics2D g2d) { // comm lines (fade out?)
+        if (!showLines) { // show moving vectors (from accel)
             drawMovingOrAccelVector(g2d);
         }
         drawAnimBar(g2d);
@@ -174,16 +182,22 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
         if (animDir == Direction.STOP || !bar.isVisible()) {
             return;
         }
-        var stroke = new BasicStroke(2);
+        var stroke = new BasicStroke(1);
         AffineTransform at = g2d.getTransform();
         g2d.rotate(Math.toRadians(bar.getRotation()), bar.getXPos() + bar.getWidth() / 2.0, bar.getYPos() + bar.getHeight() / 2.0);
         g2d.setStroke(stroke);
         g2d.setColor(Colors.YELLOW.asAWTColor().darker());
-        int di = animDir.ordinal()-1;
-        int gap = (int) (2.0 * width / ARROW_BASE_SIZE);
-        for (int offset = 0; offset < width; offset+=gap) {
-            g2d.fill(DoubleShearedRect.createShape(new Point2D.Double((width + offset + di*getFrameCounter()) % width, height-BAR_HEIGHT+15),
-                    ARROW_BASE_SIZE, ARROW_BASE_SIZE-10, di*10));
+        int mod = width + 4*ARROW_BASE_SIZE; // 2x extra draw space left+right
+        double gap = 2.0 * mod / ARROW_BASE_SIZE;
+        for (int i = 0; i < (int) (mod / gap); i++) {
+            long x = (mod + (int) (gap*i) + getFrameCounter()) % mod;
+            if (animDir == Direction.LEFT) { // invert for decreasing x pos
+                x = mod - x - 1;
+            }
+            x -= 2*ARROW_BASE_SIZE; // now apply the left side offset
+            g2d.fill(DoubleShearedRect.createShape(new Point2D.Double(x,
+                            height-BAR_HEIGHT+15), ARROW_BASE_SIZE, // TODO sometimes the width is bigger?
+                    ARROW_BASE_SIZE-10, (animDir.ordinal()-1)*10));
         }
         g2d.setTransform(at);
     }
@@ -243,7 +257,9 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
         } else {
             activeKey = 0;
         }
-        if (keyChar == 'l') {
+        if (keyChar == 'a') {
+            limitForceToActive = !limitForceToActive;
+        } else if (keyChar == 'l') {
             labelMode = LabelMode.values()[(labelMode.ordinal() + 1) % LabelMode.values().length];
         } else if (keyChar == 'c') {
             showLines = !showLines;
@@ -254,6 +270,8 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
             if (!dynamicConnections) {
                 nodes.values().forEach(n -> n.dynNeighbor.clear());
             }
+        } else if (keyChar == 'e') {
+            debugLabel.setVisible(!debugLabel.isVisible());
         } else if (keyChar == 'p') {
             nodes.values().forEach(n -> {
                 float[] pxpy = n.resetPos();
@@ -261,10 +279,15 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
                 n.main.move(pxpy[0] - current.getXPos(), pxpy[1] - current.getYPos());
             });
             bar.setRotation(0);
+        } else if (keyChar == 'z') {
+            bar.setRotation(0);
+            nodes.values().forEach(n -> n.checkForBarBounce(false));
         } else if (keyChar == ',') {
             bar.rotate(-2);
+            nodes.values().forEach(n -> n.checkForBarBounce(false));
         } else if (keyChar == '.') {
             bar.rotate(2);
+            nodes.values().forEach(n -> n.checkForBarBounce(false));
         } else if (keyChar == '-') {
             bar.setRotation(0);
         } else if (keyChar == ' ' || keyChar == 'g') {

@@ -13,6 +13,10 @@ import java.util.Set;
 class VizSensorNode {
 
     public static final int ARC_EXTRA_RADIUS = 6;
+    public static final double GRAVITY = 0.1;
+    public static final int MIN_FORCE = 2;
+    public static final int MAX_FORCE = 8; // TODO okay for more active nodes?
+    public static final double FORCE_VEC_SCALE = 0.1; // TODO value fine? invert again?
 
     final NodeViz app;
     char key;
@@ -98,7 +102,7 @@ class VizSensorNode {
         if (app.gravity) {
             moveVec.x = ((NodeViz.LP_FACTOR - 1) * moveVec.x) / NodeViz.LP_FACTOR;
             if (barIntersect(-1).length == 0) { // TODO silent stopping buggy - okay for now
-                moveVec.y += 0.1; // apply gravity
+                moveVec.y += GRAVITY; // apply gravity
                 // TODO einfallswinkel = ausfallswinkel
             } else { // "abrutschen"
                 moveVec.x = (float) (app.bar.getRotation() / 10);
@@ -140,21 +144,26 @@ class VizSensorNode {
                 main.setYPos(main.getYPos()+1);
             }
         } else {
-            checkForBarBounce();
+            checkForBarBounce(true);
         }
     }
 
-    private void checkForBarBounce() {
+    void checkForBarBounce(boolean applyRotation) {
         if (barIntersect().length > 0) {
             moveVec.y *= -0.75;
             double rel = (2.0 * main.getXPos() / NodeViz.width) - 1.0; // x position normed to [-1,1]
-            if (isActive()) { // only for nodes that are in the network
+            // TODO keyadjustments for 3 values?
+            if ((!app.limitForceToActive || isActive()) && applyRotation) { // only for nodes that are in the network
                 // at least apply 'force' of 1 downwards, but for a stronger momentum the vertical component (y)clc
-                app.bar.rotate(Math.max(1, Math.min(8, Math.abs(moveVec.y))) * rel / 10); // TODO 8 okay for more active nodes?
+                app.bar.rotate(Math.max(MIN_FORCE, Math.min(MAX_FORCE, Math.abs(moveVec.y))) * rel * FORCE_VEC_SCALE);
             }
             while (barIntersect().length > 1) {
                 main.setYPos(main.getYPos() - 1);
             }
+        }
+        if (main.getYPos() > NodeViz.height) {
+            // TODO schnitt bar-gerade an X-position...oder heben bis intersect und dann noch drüber.
+            main.setYPos(NodeViz.height / 2f);
         }
     }
 

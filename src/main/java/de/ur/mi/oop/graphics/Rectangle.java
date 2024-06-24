@@ -5,7 +5,7 @@ import de.ur.mi.oop.colors.Color;
 /**
  * Die Rectangle-Klasse ist ein grafisches Objekt, das ein Rechteck darstellt.
  */
-public class Rectangle extends GraphicsObject {
+public class Rectangle extends GraphicsObject { // TODO implements RotGraphO?
 
     double rotation;
 

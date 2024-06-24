@@ -47,18 +47,25 @@ public class Canvas extends JPanel {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
         g2d.setRenderingHints(renderingHints);
+        draw(g2d, true);
+        if (drawAdapter != null) {
+            drawAdapter.drawPreScene(g2d);
+        }
         AffineTransform orig = g2d.getTransform();
-        draw(g2d);
+        draw(g2d, false);
         g2d.setTransform(orig);
         if (drawAdapter != null) {
-            drawAdapter.draw(g2d);
+            drawAdapter.drawPostScene(g2d);
         }
     }
 
-    private void draw(Graphics2D g2d) {
+    private void draw(Graphics2D g2d, boolean background) {
         if (components != null) {
             for (GraphicsObject component : components) {
-                drawComponent(g2d, component);
+                if ((component instanceof Background && background) // TODO simplify?
+                        || (!(component instanceof Background) && !background)) {
+                    drawComponent(g2d, component);
+                }
             }
         }
     }
