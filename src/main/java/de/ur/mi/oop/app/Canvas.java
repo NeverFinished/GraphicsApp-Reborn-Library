@@ -62,6 +62,7 @@ public class Canvas extends JPanel {
     private void draw(Graphics2D g2d, boolean background) {
         if (components != null) {
             for (GraphicsObject component : components) {
+                // TODO sauberer wäre background gar nicht in den components/drawBuffer sondern separat referenzieren.
                 if ((component instanceof Background && background) // TODO simplify?
                         || (!(component instanceof Background) && !background)) {
                     drawComponent(g2d, component);

@@ -187,7 +187,7 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
         g2d.rotate(Math.toRadians(bar.getRotation()), bar.getXPos() + bar.getWidth() / 2.0, bar.getYPos() + bar.getHeight() / 2.0);
         g2d.setStroke(stroke);
         g2d.setColor(Colors.YELLOW.asAWTColor().darker());
-        int mod = width + 4*ARROW_BASE_SIZE; // 2x extra draw space left+right
+        int mod = width + 4*ARROW_BASE_SIZE; // 2x2 extra draw space left+right
         double gap = 2.0 * mod / ARROW_BASE_SIZE;
         for (int i = 0; i < (int) (mod / gap); i++) {
             long x = (mod + (int) (gap*i) + getFrameCounter()) % mod;
@@ -195,8 +195,7 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
                 x = mod - x - 1;
             }
             x -= 2*ARROW_BASE_SIZE; // now apply the left side offset
-            g2d.fill(DoubleShearedRect.createShape(new Point2D.Double(x,
-                            height-BAR_HEIGHT+15), ARROW_BASE_SIZE, // TODO sometimes the width is bigger?
+            g2d.fill(DoubleParallelogram.createShape(new Point2D.Double(x, height-BAR_HEIGHT+15), ARROW_BASE_SIZE,
                     ARROW_BASE_SIZE-10, (animDir.ordinal()-1)*10));
         }
         g2d.setTransform(at);

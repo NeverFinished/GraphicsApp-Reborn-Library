@@ -5,7 +5,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 
-public class DoubleShearedRect {
+public class DoubleParallelogram {
     public static Shape createShape(Point2D origin, double width, double height, double shear) {
         AffineTransform transform = new AffineTransform();
         GeneralPath path = new GeneralPath();
