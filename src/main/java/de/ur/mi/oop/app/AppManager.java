@@ -60,14 +60,36 @@ public class AppManager implements ConfigChangeListener, ActionListener, KeyList
         canvas = new Canvas();
         appFrame = new JFrame();
         appFrame.setTitle(config.getTitle());
-        appFrame.setSize(config.getWidth(), config.getHeight());
+        if (!config.isFullScreen()) appFrame.setSize(config.getWidth(), config.getHeight());
         appFrame.setLocationRelativeTo(null);
-        //appFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        appFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         appFrame.setResizable(false);
         appFrame.add(canvas);
         canvas.addMouseListener(this);  // MouseListener auf Canvas, damit Koordinaten Titelleiste nicht beinhalten
         canvas.addMouseMotionListener(this);
         appFrame.addKeyListener(this);
+
+        if (config.isFullScreen()) {
+            // TODO doesn't work here, but would be nice to pass it back to canvas/config
+            //java.awt.Rectangle bounds = ((Graphics2D) canvas.getGraphics()).getDeviceConfiguration().getBounds();
+            //config.setWidth(bounds.width);
+            //config.setHeight(bounds.height);
+            GraphicsEnvironment graphicsEnvironment = GraphicsEnvironment.getLocalGraphicsEnvironment();
+            GraphicsDevice graphicsDevice = graphicsEnvironment.getDefaultScreenDevice();
+            appFrame.setUndecorated(true);
+            graphicsDevice.setFullScreenWindow(appFrame);
+            appFrame.addKeyListener(new KeyAdapter() {
+                @Override
+                public void keyPressed(java.awt.event.KeyEvent e) {
+                    if (e.getKeyCode() == java.awt.event.KeyEvent.VK_ESCAPE) {
+                        graphicsDevice.setFullScreenWindow(null);
+                        appFrame.dispose();
+                    }
+                }
+            });
+        }
+
+
         appFrame.setVisible(true);
         originalCursor = appFrame.getContentPane().getCursor();
         blankCursor = Toolkit.getDefaultToolkit().createCustomCursor(

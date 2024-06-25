@@ -1,5 +1,6 @@
 package examples.iotsensordemo;
 
+import de.ur.mi.oop.app.Config;
 import de.ur.mi.oop.app.SimpleGraphicsApp;
 import de.ur.mi.oop.colors.Color;
 import de.ur.mi.oop.colors.Colors;
@@ -51,11 +52,31 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
     Label debugLabel; // TODO add render here
 
     { // TODO more!
-        colors.put('B', RED_MB);
-        colors.put('C', YELLOW_MB);
+        colors.put('A', BLUE_LIGHT_MB);
+        colors.put('B', ORANGE_MB);
+        colors.put('C', ORANGE_MB);
         colors.put('D', ORANGE_MB);
-        colors.put('E', BLUE_DARK_MB);
-        colors.put('F', BLUE_LIGHT_MB);
+        colors.put('E', YELLOW_MB);
+        colors.put('F', YELLOW_MB);
+        colors.put('G', BLUE_LIGHT_MB);
+        colors.put('H', BLUE_DARK_MB);
+        colors.put('I', BLUE_LIGHT_MB);
+        colors.put('J', RED_MB);
+        colors.put('K', RED_MB);
+        colors.put('L', BLUE_DARK_MB);
+        colors.put('M', YELLOW_MB);
+        colors.put('N', YELLOW_MB);
+        colors.put('O', BLUE_LIGHT_MB);
+        colors.put('P', BLUE_LIGHT_MB);
+        colors.put('Q', ORANGE_MB);
+        colors.put('R', BLUE_DARK_MB);
+        colors.put('S', RED_MB);
+        colors.put('T', RED_MB);
+        colors.put('U', RED_MB);
+        colors.put('V', RED_MB);
+        colors.put('W', RED_MB);
+        colors.put('X', ORANGE_MB);
+        colors.put('Y', YELLOW_MB);
     }
 
     record NodePair(VizSensorNode l, VizSensorNode r) {
@@ -63,12 +84,13 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
 
     @Override
     public void initialize() {
+        getConfig().setFullScreen(true);
+        // TODO move out of here...
         java.awt.Rectangle bounds = getAppManager().getGraphicsContext().getDeviceConfiguration().getBounds();
-        //setCanvasSize(WIDTH, HEIGHT);
-        setCanvasSize(bounds.width, bounds.height - 64); // TODO try fullscreen
+        setCanvasSize(bounds.width, bounds.height);
         getAppManager().getAppFrame().setLocation(0, 0);
-        width = bounds.width;
-        height = bounds.height - 64;
+        width = getConfig().getWidth();
+        height = getConfig().getHeight();
         setBackgroundColor(Colors.BLACK);
         createNodes();
         debugLabel = add(new Label(15, 25, "fmin=1, fmax=8, fdiv=10, g=0.1", Colors.BLACK.brighter()));
@@ -314,7 +336,7 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
     }
 
     public static void main(String[] args) {
-        GraphicsAppLauncher.launch();
+        GraphicsAppLauncher.launch(NodeViz.class.getSimpleName(), new Config().withFullScreen(true));
     }
 
     private class BarBoundCircle extends Circle {

@@ -28,6 +28,7 @@ public class Config {
     private float strokeWidth = DEFAULT_STROKE_WIDTH;
     private String title = DEFAULT_TITLE;
     private boolean cursorVisibility = DEFAULT_CURSOR_VISIBILITY;
+    private boolean fullScreen;
 
     private ConfigChangeListener listener;
 
@@ -108,4 +109,16 @@ public class Config {
         this.showFrameRate = frameRateIsVisible;
     }
 
+    public boolean isFullScreen() {
+        return fullScreen;
+    }
+
+    public void setFullScreen(boolean fullScreen) {
+        this.fullScreen = fullScreen;
+    }
+
+    public Config withFullScreen(boolean fullScreen) {
+        setFullScreen(fullScreen);
+        return this;
+    }
 }
