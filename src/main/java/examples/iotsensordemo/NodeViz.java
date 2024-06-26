@@ -13,6 +13,7 @@ import de.ur.mi.oop.graphics.Rectangle;
 import de.ur.mi.oop.launcher.GraphicsAppLauncher;
 
 import java.awt.*;
+import java.awt.event.KeyEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.util.*;
@@ -20,6 +21,9 @@ import java.util.*;
 enum LabelMode {NONE, KEY, LINE}
 
 public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
+
+    public static final boolean FULLSCREEN = false;
+    public static final boolean ENABLE_SERIAL = false;
 
     public static final int ANIM_DELAY = 20;
     public static final int ARROW_BASE_SIZE = 40;
@@ -44,12 +48,15 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
     char activeKey = 0;
     enum Direction { LEFT, STOP, RIGHT }
     Direction animDir = Direction.STOP;
+    Scene scene = new Scene();
 
     Map<Character, VizSensorNode> nodes = new LinkedHashMap<>();
     Map<Character, Color> colors = new LinkedHashMap<>();
     Collection<NodePair> lines = new ArrayList<>();
     Rectangle bar;
-    Label debugLabel; // TODO add render here
+    Label debugLabel;
+    int activeNodeCount;
+    String rssiStats;
 
     {
         colors.put('A', BLUE_LIGHT_MB);
@@ -84,16 +91,25 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
 
     @Override
     public void initialize() {
-        getConfig().setFullScreen(true);
-        // TODO move out of here...:
+        // TODO move out of here to framework:
         java.awt.Rectangle bounds = getAppManager().getGraphicsContext().getDeviceConfiguration().getBounds();
-        setCanvasSize(bounds.width, bounds.height);
+        if (getConfig().isFullScreen()) {
+            setCanvasSize(bounds.width, bounds.height);
+        } else {
+            setCanvasSize(bounds.width, bounds.height-64);
+        }
         getAppManager().getAppFrame().setLocation(0, 0);
         width = getConfig().getWidth();
         height = getConfig().getHeight();
         setBackgroundColor(Colors.BLACK);
         createNodes();
-        debugLabel = add(new Label(15, 25, "fmin=1, fmax=8, fdiv=10, g=0.1", Colors.BLACK.brighter()));
+        debugLabel = add(new Label(15, 25, "fmin=1, fmax=8, fdiv=10, g=0.1", Colors.BLACK.brighter()) {
+                             @Override
+                             public void draw() {
+                                 setText(String.format("#n=%d state=%s rcvSts=%s", activeNodeCount, scene, rssiStats));
+                                 super.draw();
+                             }
+                         });
         bar = add(new Rectangle(-50, height - BAR_HEIGHT, width + 100, BAR_HEIGHT, Colors.BLACK.brighter().brighter()) {
             @Override
             public void rotate(double degrees) {
@@ -109,8 +125,7 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
 
         buildStandardNodeConnections();
 
-        //StdIn.pass(s -> parseLine(s));
-        new SerialReader(false).connect(this::parseLine);
+        if (ENABLE_SERIAL) new SerialReader(false).connect(this::parseLine);
     }
 
     private void createNodes() {
@@ -174,6 +189,13 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
                 } catch (ArrayIndexOutOfBoundsException e) {
                     System.err.println(e.getMessage());
                 }
+            }
+
+            if (getFrameCounter() % 10 == 0) {
+                var nodes = new ArrayList<>(this.nodes.values());
+                activeNodeCount = nodes.stream().mapToInt(n->n.isActive() ? 1 : 0).sum();
+                var iss = nodes.stream().map(n -> n.latest).filter(Objects::nonNull).mapToInt(d -> d.rssi).summaryStatistics();
+                rssiStats = iss.toString().replaceAll("IntSummaryStatistics", "");
             }
         }
         System.exit(0);
@@ -290,7 +312,11 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
         } else {
             activeKey = 0;
         }
-        if (keyChar == 'a') {
+        if (keyChar == ' ') {
+            scene.next();
+        } else if (keyChar == KeyEvent.VK_BACK_SPACE) {
+            scene.prev();
+        } else if (keyChar == 'a') {
             limitForceToActive = !limitForceToActive;
         } else if (keyChar == 'l') {
             labelMode = LabelMode.values()[(labelMode.ordinal() + 1) % LabelMode.values().length];
@@ -325,7 +351,7 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
             nodes.values().forEach(n -> n.checkForBarBounce(false));
         } else if (keyChar == '-') {
             bar.setRotation(0);
-        } else if (keyChar == ' ' || keyChar == 'g') {
+        } else if (keyChar == 'g') {
             gravity = !gravity;
             if (gravity) {
                 for (VizSensorNode vsn : nodes.values()) {
@@ -349,8 +375,49 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
         }
     }
 
+    class Scene {
+
+        enum SceneState { INITIAL, DYNCONN, MOVEVEC, GRAVITY, LEFT, RIGHT}
+        SceneState current = SceneState.INITIAL;
+
+        void next() {
+            if (current != SceneState.RIGHT) {
+                current = SceneState.values()[current.ordinal()+1];
+            }
+            switch (current) {
+                case DYNCONN -> dynamicConnections = true;
+                case MOVEVEC -> showLines = false;
+                case GRAVITY -> gravity = true;
+                case LEFT -> animDir = Direction.LEFT;
+                case RIGHT -> animDir = Direction.RIGHT;
+            }
+        }
+
+        // basically reversing next, no full state reset
+        void prev() {
+            if (current != SceneState.INITIAL) {
+                current = SceneState.values()[current.ordinal()-1];
+            }
+            switch (current) {
+                case INITIAL -> dynamicConnections = false;
+                case DYNCONN -> {
+                    showLines = true;
+                    dynamicConnections = true;
+                }
+                case MOVEVEC -> gravity = false;
+                case GRAVITY -> animDir = Direction.STOP;
+                case LEFT -> animDir = Direction.LEFT;
+            }
+        }
+
+        @Override
+        public String toString() {
+            return current.toString();
+        }
+    }
+
     public static void main(String[] args) {
-        GraphicsAppLauncher.launch(NodeViz.class.getSimpleName(), new Config().withFullScreen(true));
+        GraphicsAppLauncher.launch(NodeViz.class.getSimpleName(), new Config().withFullScreen(FULLSCREEN));
     }
 
     private class BarBoundCircle extends Circle {
