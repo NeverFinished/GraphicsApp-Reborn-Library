@@ -191,7 +191,7 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
                 }
             }
 
-            if (getFrameCounter() % 10 == 0) {
+            if (getFrameCounter() % 100 == 0) {
                 var nodes = new ArrayList<>(this.nodes.values());
                 activeNodeCount = nodes.stream().mapToInt(n->n.isActive() ? 1 : 0).sum();
                 var iss = nodes.stream().map(n -> n.latest).filter(Objects::nonNull).mapToInt(d -> d.rssi).summaryStatistics();
@@ -340,6 +340,8 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
                 n.main.move(pxpy[0] - current.getXPos(), pxpy[1] - current.getYPos());
             });
             bar.setRotation(0);
+        } else if (keyChar == 'x' && activeKey != 0) {
+            // TODO disable?
         } else if (keyChar == 'z') {
             bar.setRotation(0);
             nodes.values().forEach(n -> n.checkForBarBounce(false));
@@ -377,7 +379,7 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
 
     class Scene {
 
-        enum SceneState { INITIAL, DYNCONN, MOVEVEC, GRAVITY, LEFT, RIGHT}
+        enum SceneState { INITIAL, DYNCONN, MOVEVEC, GRAVITY, LEFT, RIGHT} // highlight missing, on purpose
         SceneState current = SceneState.INITIAL;
 
         void next() {
