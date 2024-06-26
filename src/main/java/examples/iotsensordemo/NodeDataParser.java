@@ -73,7 +73,7 @@ public class NodeDataParser {
         }
 
         public boolean anyButtonPressed() {
-            return buttonA + buttonB + touchLogo > 0;
+            return buttonA + buttonB > 0; // 20240625 - touch excluded, some nodes have a stuck touch
         }
 
         // rssi is in range -70 to -30. more is better

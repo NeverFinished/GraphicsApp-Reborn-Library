@@ -39,7 +39,7 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
     public static final de.ur.mi.oop.colors.Color BLUE_LIGHT_MB = new de.ur.mi.oop.colors.Color(121, 247, 237);
     public static final de.ur.mi.oop.colors.Color BLUE_DARK_MB = new de.ur.mi.oop.colors.Color(80, 190, 250);
 
-    boolean gravity = false, limitForceToActive = true, dynamicConnections, showLines = true, showRSSI = true;
+    boolean gravity, highlight, limitForceToActive = true, dynamicConnections, showLines = true, showRSSI = true;
     LabelMode labelMode = LabelMode.KEY;
     char activeKey = 0;
     enum Direction { LEFT, STOP, RIGHT }
@@ -51,7 +51,7 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
     Rectangle bar;
     Label debugLabel; // TODO add render here
 
-    { // TODO more!
+    {
         colors.put('A', BLUE_LIGHT_MB);
         colors.put('B', ORANGE_MB);
         colors.put('C', ORANGE_MB);
@@ -85,7 +85,7 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
     @Override
     public void initialize() {
         getConfig().setFullScreen(true);
-        // TODO move out of here...
+        // TODO move out of here...:
         java.awt.Rectangle bounds = getAppManager().getGraphicsContext().getDeviceConfiguration().getBounds();
         setCanvasSize(bounds.width, bounds.height);
         getAppManager().getAppFrame().setLocation(0, 0);
@@ -110,7 +110,7 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
         buildStandardNodeConnections();
 
         //StdIn.pass(s -> parseLine(s));
-        //new SerialReader(false).connect(this::parseLine);
+        new SerialReader(false).connect(this::parseLine);
     }
 
     private void createNodes() {
@@ -198,6 +198,18 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
             drawMovingOrAccelVector(g2d);
         }
         drawAnimBar(g2d);
+        if (highlight) {
+            drawHighlight(g2d);
+        }
+
+    }
+
+    private void drawHighlight(Graphics2D g2d) {
+        var stroke = new BasicStroke(8);
+        g2d.setStroke(stroke);
+        g2d.setColor(Colors.RED.asAWTColor());
+        VizSensorNode a = nodes.get('A');
+        g2d.drawOval((int) a.main.getXPos()-70, (int) a.main.getYPos()-70, 140, 140);
     }
 
     private void drawAnimBar(Graphics2D g2d) {
@@ -293,6 +305,8 @@ public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
             }
         } else if (keyChar == 'e') {
             debugLabel.setVisible(!debugLabel.isVisible());
+        } else if (keyChar == 'h') {
+            highlight = !highlight;
         } else if (keyChar == 'p') {
             nodes.values().forEach(n -> {
                 float[] pxpy = n.resetPos();
