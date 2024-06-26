@@ -22,8 +22,8 @@ enum LabelMode {NONE, KEY, LINE}
 
 public class NodeViz extends SimpleGraphicsApp implements DrawAdapter {
 
-    public static final boolean FULLSCREEN = false;
-    public static final boolean ENABLE_SERIAL = false;
+    public static final boolean FULLSCREEN = true;
+    public static final boolean ENABLE_SERIAL = true;
 
     public static final int ANIM_DELAY = 20;
     public static final int ARROW_BASE_SIZE = 40;

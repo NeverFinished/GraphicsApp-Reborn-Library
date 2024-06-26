@@ -12,6 +12,8 @@ import java.util.Set;
 
 class VizSensorNode {
 
+    public static final int FONT_SIZE = 22; // okay for 1280x720 @ D001
+
     public static final int ARC_EXTRA_RADIUS = 6;
     public static final double GRAVITY = 0.1;
     public static final int MIN_FORCE = 2;
@@ -83,7 +85,7 @@ class VizSensorNode {
         right.setVisible(false);
         left.setVisible(false);
         node = main.addRelative(new Circle(0, 0, 21, color != null ? color : Colors.LIGHT_GREY));
-        label = main.addRelative(new Label(-8, 8, "" + key));
+        label = main.addRelative(new Label(-8, 8, "" + key, FONT_SIZE));
         return main;
     }
 

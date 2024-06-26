@@ -16,8 +16,18 @@ public class Label extends GraphicsObject implements RotatableGraphicsObject {
     private static final String DEFAULT_FONT = "SansSerif";
 
     private String text;
-    private String font;
+    private String font = DEFAULT_FONT;
     private int fontSize;
+
+    public Label(float x, float y, String text, int fontSize, Color fontColor) {
+        this(x, y, text);
+        setFontSize(fontSize);
+        setColor(fontColor);
+    }
+    public Label(float x, float y, String text, int fontSize) {
+        this(x, y, text);
+        setFontSize(fontSize);
+    }
 
     /**
      * Konstruiert ein neues Label, das an den Koordinaten x und y mit
@@ -31,8 +41,7 @@ public class Label extends GraphicsObject implements RotatableGraphicsObject {
         super(x, y);
         this.text = text;
         this.fontSize = DEFAULT_FONT_SIZE;
-        this.font = DEFAULT_FONT;
-        this.type = GraphicsObjectType.LABEL;
+        this.type = GraphicsObjectType.LABEL; // TODO move to superclass or getter. replace by class?
     }
 
     /**
