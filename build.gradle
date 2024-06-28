@@ -1,11 +1,21 @@
+
+plugins {
+    id 'java-library'
+}
+
 apply plugin: 'java'
 apply plugin: 'application'
+
 
 application {
     mainClass = 'examples.GameLoopDemo'
 }
 //sourceCompatibility = 17
 //targetCompatibility = 17
+
+dependencies {
+
+}
 
 repositories {
     mavenCentral()
